@@ -145,7 +145,7 @@ function drawTag(k){const o=shG[k];if(!o)return;const id=S.shelves[k],t=o.tag.us
 function refresh(k){const o=shG[k];if(!o)return;const n=Math.min(12,S.stock[S.shelves[k]]);for(let i=0;i<12;i++)o.items[i].visible=i<n;drawTag(k)}
 
 function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);g.font="bold 20px sans-serif";g.fillText("08.00 - 21.00",128,108);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
-function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#0f2a22";g.fillRect(0,0,256,136);g.fillStyle="#8ee5c1";g.textAlign="left";g.font="bold 18px monospace";g.fillText((a||"").slice(0,16),10,24);g.textAlign="right";g.fillText(b||"",246,24);
+function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,136);g.fillStyle="#8ee5c1";g.textAlign="left";g.font="bold 18px monospace";g.fillText((a||"").slice(0,16),10,24);g.textAlign="right";g.fillText(b||"",246,24);
  g.textAlign="center";g.font="bold 22px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,66);g.font="bold 40px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,112);scrTx.needsUpdate=true;
  sT("lcdv",t==null?"Rp0":rp(t));sT("lcdi",a&&b?a+"  "+b:(a||""))}
 const avgRev=()=>{const a=S.rev.slice(0,20);return a.length?a.reduce((x,r)=>x+r.s,0)/a.length:S.rating};
@@ -358,7 +358,7 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=true});drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
