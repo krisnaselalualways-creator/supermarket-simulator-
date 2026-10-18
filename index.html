@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f1724">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Supermarket Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- HUD -->
+<div id="dayw"><i id="dayb"></i></div>
+<div id="hud"><span id="hm"></span><span id="hr"></span><span id="hs"></span><span id="hc"></span><span id="he"></span></div>
+<button class="mini" id="qm" aria-label="Panduan">❓</button>
+<button class="mini" id="gear" aria-label="Pengaturan">⚙️</button>
+<div id="xh"></div>
+
+<!-- panel bidikan -->
+<div id="aim"><div class="pr"><button class="btn sm" id="pm1" aria-label="Turunkan harga">−</button><b id="pv"></b><button class="btn sm" id="pp1" aria-label="Naikkan harga">+</button></div><small id="ph2"></small></div>
+<div id="fillt"><span id="fillx"></span><div class="bar"><i id="fillb"></i></div></div>
+<div id="scant"></div>
+<div id="lcd"><small>TOTAL</small><b id="lcdv">Rp0</b><span id="lcdi"></span></div>
+<button id="exitk">KELUAR<br>DARI KASIR</button>
+<div id="mvbar"><button class="btn" id="mvrot">↻ Putar</button><button class="btn alt" id="mvx">✖ Batal</button></div>
+
+<!-- kontrol -->
+<div id="joy"><i id="knob"></i></div>
+<div id="handl"></div>
+<button id="hand" aria-label="Aksi tangan">✋</button>
+<button id="ph">📱 Ponsel</button>
+<div id="msg"></div>
+<div id="rvt"></div>
+
+<!-- pembayaran -->
+<div class="modal" id="bill" hidden><div class="card">
+  <h3>🧾 Pembayaran</h3>
+  <div id="hag" hidden><p id="hgt" style="font-weight:700"></p><div class="grid2"><button class="btn" id="hy">Kasih diskon</button><button class="btn alt" id="hn">Tolak</button></div></div>
+  <div id="pay" hidden>
+    <div class="row"><span>Total belanja</span><b id="bt"></b></div>
+    <div class="row cashonly"><span>Pelanggan bayar</span><b id="bp"></b></div>
+    <div class="row cashonly big"><span>Kembalian kamu</span><b id="bg"></b></div>
+    <div class="row" id="hintrow" style="display:none;cursor:pointer"><span>💡 Kembalian seharusnya<small>ketuk untuk hidup/matikan</small></span><b id="hintv"></b></div>
+    <div class="keys cashonly" id="dn"></div>
+    <div class="grid2"><button class="btn alt cashonly" id="rs">Reset</button><button class="btn go" id="ok">✅ Beri kembalian</button></div>
+  </div>
+  <button class="btn ghost" id="bc">Batal &amp; keluar kasir</button>
+</div></div>
+
+<!-- akhir hari -->
+<div class="modal" id="sum" hidden><div class="card">
+  <h3 id="st"></h3><div id="sb"></div>
+  <button class="btn alt" id="sp" style="width:100%;margin-top:10px">📱 Belanja stok dulu</button>
+  <button class="btn go" id="sn" style="width:100%;margin-top:8px"></button>
+</div></div>
+
+<!-- ponsel -->
+<div class="modal" id="phone" hidden><div class="card">
+  <div class="phead"><b>📱 Ponsel</b><b id="pm"></b></div>
+  <div class="tabs"><button data-t="0">📦 Stok</button><button data-t="3">💲 Harga</button><button data-t="1">🏪 Properti</button><button data-t="2">🗺️ Lahan</button><button data-t="5">🖥️ Mesin</button><button data-t="6">🛵 Pesanan</button><button data-t="7">⭐ Ulasan</button></div>
+  <div id="pb"></div>
+  <button class="btn ghost" id="pc">Tutup</button>
+</div></div>
+
+<!-- panduan -->
+<div class="modal" id="help" hidden><div class="card">
+  <h3 id="hh"></h3><p id="hb"></p><div id="hdots"></div>
+  <div class="grid2"><button class="btn alt" id="hprev">◀ Kembali</button><button class="btn go" id="hnext"></button></div>
+  <button class="btn ghost" id="hskip">Lewati panduan</button>
+</div></div>
+
+<!-- pengaturan -->
+<div class="modal" id="set" hidden><div class="card">
+  <h3>⚙️ Pengaturan</h3>
+  <button class="btn alt" id="tsnd" style="width:100%"></button>
+  <button class="btn alt" id="tvib" style="width:100%;margin-top:8px"></button>
+  <button class="btn alt" id="tq" style="width:100%;margin-top:8px"></button>
+  <div class="row"><span>Sensitivitas geser layar</span></div>
+  <input type="range" id="sens" min="50" max="200" step="10">
+  <button class="btn alt" id="shelp" style="width:100%;margin-top:10px">❓ Tampilkan panduan</button>
+  <button class="btn" id="srst" style="width:100%;margin-top:8px;background:#f2b8b5;box-shadow:0 3px 0 #b97a77;color:#4a1513">🗑️ Reset progres</button>
+  <button class="btn ghost" id="sc2">Tutup</button>
+</div></div>
+
+<div id="boot"><i></i>Memuat toko…</div>
+
+<script src="three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>')</script>
+<script src="script.js"></script>
+</body>
+  </html>
+  
