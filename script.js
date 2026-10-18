@@ -322,7 +322,7 @@ function spawn(){
  const wants=av.sort(()=>Math.random()-.5).slice(0,n).map(p=>({pid:p.id,q:1+Math.floor(Math.random()*(ty==="bulk"?3:2))}));
  const m=person(pick(SH),pick(HAIR),pick(SKIN),pick(PANTS),Math.random()<.25);sc.add(m);
  if(ty!=="normal"){const ic=emoSprite({rush:"⏱️",bulk:"🛒",tawar:"💬"}[ty]);ic.position.set(0,2.05,0);m.add(ic)}
- SFX.bell();cs.push({m,ty,pat:ty==="rush"?30:ty==="bulk"?100:75,qris:Math.random()<(S.mach>=3?.6:.35),mv:false,x:W()-2.5,z:8,wants,cart:[],st:"in",i:0,t:0,wait:0,qt:0,sp:(ty==="rush"?2.5:1.5)+Math.random()*.5,off:(Math.random()-.5)*1.4,rd:false})}
+ SFX.bell();cs.push({m,ty,pat:ty==="rush"?45:ty==="bulk"?150:120,qris:Math.random()<(S.mach>=3?.6:.35),mv:false,x:W()-2.5,z:8,wants,cart:[],st:"in",i:0,t:0,wait:0,qt:0,sp:(ty==="rush"?2.5:1.5)+Math.random()*.5,off:(Math.random()-.5)*1.4,rd:false})}
 function mvTo(c,tx,tz,dt){const dx=tx-c.x,dz=tz-c.z,d=Math.hypot(dx,dz);if(d<.08){c.mv=false;return true}c.mv=true;const s=Math.min(d,c.sp*dt);c.x+=dx/d*s;c.z+=dz/d*s;c.m.rotation.y=Math.atan2(dx,dz);return false}
 const EXIT=()=>[[W()-2.5,4.8],[W()-2.5,8.5]];
 function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
@@ -336,7 +336,7 @@ function updC(dt,now){
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(!w){if(c.cart.length){c.st="queue";c.qt=now;c.wait=0}else out(c,1,"st")}
    else{const k=S.shelves.indexOf(w.pid);if(k<0)c.i++;else{const p=stand(k,c.off);if(mvTo(c,p[0],p[1],dt)){c.t+=dt;if(c.t>1){const n=Math.min(w.q,S.stock[w.pid]);if(n>0){S.stock[w.pid]-=n;c.cart.push({pid:w.pid,q:n});refresh(k);SFX.pop();if(Math.random()<.22)drop(c.x,c.z)}c.i++;c.t=0}}}}}
-  else if(c.st==="queue"){c.wait+=dt;const i=q.indexOf(c);if(mvTo(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
+  else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(mvTo(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
   else if(c.st==="out"){const p=c.path[0];if(p&&mvTo(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
