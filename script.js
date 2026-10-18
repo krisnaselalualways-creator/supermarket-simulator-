@@ -336,7 +336,7 @@ function updC(dt,now){
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(!w){if(c.cart.length){c.st="queue";c.qt=now;c.wait=0}else out(c,1,"st")}
    else{const k=S.shelves.indexOf(w.pid);if(k<0)c.i++;else{const p=stand(k,c.off);if(mvTo(c,p[0],p[1],dt)){c.t+=dt;if(c.t>1){const n=Math.min(w.q,S.stock[w.pid]);if(n>0){S.stock[w.pid]-=n;c.cart.push({pid:w.pid,q:n});refresh(k);SFX.pop();if(Math.random()<.22)drop(c.x,c.z)}c.i++;c.t=0}}}}}
-  else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(mvTo(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
+  else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(mvTo(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
   else if(c.st==="out"){const p=c.path[0];if(p&&mvTo(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
