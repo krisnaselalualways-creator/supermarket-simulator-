@@ -328,7 +328,7 @@ const EXIT=()=>[[W()-2.5,4.8],[W()-2.5,8.5]];
 function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
 function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.push(i.pid)});
  c.cm=u.map((id,k)=>{const m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(k%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(k/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
-  const ol=new THREE.Mesh(GE[id],OLM);ol.scale.set(1.45,1.45,1.45);ol.visible=false;m.add(ol);m.userData.ol=ol;sc.add(m);return m});SFX.pop()}
+  const ol=new THREE.Mesh(GE[id],OLM);ol.scale.set(1.12,1.12,1.12);ol.visible=false;m.add(ol);m.userData.ol=ol;sc.add(m);return m});SFX.pop()}
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
@@ -375,7 +375,7 @@ function scanTick(dt,now){
  if(!B.scan)return;const dur=S.mach>=2?.22:.38;
  B.fly=B.fly.filter(f=>{f.t+=dt;const p=Math.min(1,f.t/dur),o=f.m.userData.o;if(o)f.m.position.set(o.x+(2.05-o.x)*p,o.y+(1.3-o.y)*p+Math.sin(Math.PI*p)*.3,o.z+(3.62-o.z)*p);
   if(p>=1){f.m.visible=false;const pid=B.units[f.k];B.run+=pr(pid);B.done++;drawScr(PP[pid].n,rp(pr(pid)),B.run);snd(1500,.07,"square",.05);return false}return true});
- if(!B.fin){B.c.cm.forEach(m=>{if(m.visible&&!m.userData.f&&m.userData.ol){const s=1.45+.1*Math.sin(now*6);m.userData.ol.scale.set(s,s,s)}});sD("scant","block");sT("scant","👆 Ketuk barang untuk dipindai ("+B.done+"/"+B.units.length+")")}
+ if(!B.fin){B.c.cm.forEach(m=>{if(m.visible&&!m.userData.f&&m.userData.ol){const s=1.12+.03*Math.sin(now*6);m.userData.ol.scale.set(s,s,s)}});sD("scant","block");sT("scant","👆 Ketuk barang untuk dipindai ("+B.done+"/"+B.units.length+")")}
  if(B.done>=B.units.length&&!B.fly.length&&!B.fin){B.fin=true;B.scan=false;sD("scant","none");finishScan()}}
 function finishScan(){
  drawScr("TOTAL","",B.tot);
