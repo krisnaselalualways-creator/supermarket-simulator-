@@ -330,7 +330,7 @@ function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.pus
  c.cm=u.map((id,k)=>{const m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(k%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(k/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
   const ol=new THREE.Mesh(GE[id],OLM);ol.scale.set(1.12,1.12,1.12);ol.visible=false;m.add(ol);m.userData.ol=ol;sc.add(m);return m});SFX.pop()}
 function updC(dt,now){
- const q=cs.filter(c=>c.st==="queue").sort((a,b)=>a.qt-b.qt);
+ const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
   if(c.st==="in"){if(mvTo(c,W()-2.5,4.8,dt))c.st="shop"}
   else if(c.st==="shop"){const w=c.wants[c.i];
