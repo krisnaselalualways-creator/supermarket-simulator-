@@ -355,7 +355,7 @@ function enterCash(){
 function leaveCash(){if(B)cancelBill();CASH=false;document.body.classList.remove("cash");sD("scant","none");applyFov()}
 function beginBill(c){
  c.st="pay";let tot=0;const units=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++){units.push(i.pid);tot+=pr(i.pid)}});
- const nt=[5000,10000,20000,50000,100000,200000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
+ const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
  c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=true});drawScr("Siap dipindai","",0)}
@@ -402,7 +402,7 @@ function moneyBtn(v,c,coin){const b=document.createElement("button");b.className
  b.addEventListener("click",()=>addGive(v));$(coin?"dcoin":"dbill").appendChild(b)}
 BILLS.forEach(d=>moneyBtn(d[0],d[1],false));COINS.forEach(d=>moneyBtn(d[0],d[1],true));
 {const u=document.createElement("button");u.className="bn undo";u.textContent="↶";u.setAttribute("aria-label","Urungkan");u.addEventListener("click",undoGive);$("dcoin").appendChild(u)}
-$("rs").addEventListener("click",()=>{if(B){B.give=0;sT("bg",rp(0))}});
+$("rs").addEventListener("click",()=>{if(B){B.give=0;B.stk=[];sT("bg",rp(0))}});
 $("exitk").addEventListener("click",leaveCash);$("bc").addEventListener("click",leaveCash);
 $("ok").addEventListener("click",()=>{
  if(!B||!B.fin)return;if(B.method==="qris"){B.paid=B.tot;B.give=0}
