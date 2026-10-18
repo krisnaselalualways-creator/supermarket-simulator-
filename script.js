@@ -392,8 +392,16 @@ function hintUI(){const q=B&&B.method==="qris",v=S.mach>=5&&!q;sD("hintrow",v?"f
 $("hintrow").addEventListener("click",()=>{if(!B)return;S.set.hint=S.set.hint===0?1:0;save();hintUI()});
 $("hy").addEventListener("click",()=>{if(!B||!B.hag)return;B.tot-=B.hag;B.hag=0;B.dsc=1;rate(4);msg("Diskon diberikan. Pelanggan senang!");showPay()});
 $("hn").addEventListener("click",()=>{if(!B||!B.hag)return;B.hag=0;B.dsc=-1;rate(2);msg("Diskon ditolak. Pelanggan agak kesal.");showPay()});
-["1","2","3","4","5","6","7","8","9","⌫","0","000"].forEach(k=>{const b=document.createElement("button");b.textContent=k;b.className="key";
- b.addEventListener("click",()=>{if(!B)return;let g=B.give;if(k==="⌫")g=Math.floor(g/10);else g=Math.min(k==="000"?g*1000:g*10+(+k),9999999);B.give=g;sT("bg",rp(g));vib(6)});$("dn").appendChild(b)});
+/* tombol uang rupiah: ketuk pecahan untuk menambah kembalian */
+const BILLS=[[2000,"#c9ccd1"],[5000,"#d8b48a"],[10000,"#b9a3e3"],[20000,"#9ad8a6"],[50000,"#8cc4ee"],[100000,"#f09aa6"]];
+const COINS=[[500,"#dfe3e8"],[1000,"#f2c14e"]];
+function addGive(v){if(!B||B.give+v>9999999)return;B.give+=v;(B.stk=B.stk||[]).push(v);sT("bg",rp(B.give));vib(6)}
+function undoGive(){if(!B||!B.stk||!B.stk.length)return;B.give-=B.stk.pop();sT("bg",rp(B.give));vib(6)}
+function moneyBtn(v,c,coin){const b=document.createElement("button");b.className="bn"+(coin?" cn":"");b.style.background=c;
+ b.innerHTML=coin?"<small>Rp</small>"+v.toLocaleString("id-ID"):"Rp"+v.toLocaleString("id-ID");
+ b.addEventListener("click",()=>addGive(v));$(coin?"dcoin":"dbill").appendChild(b)}
+BILLS.forEach(d=>moneyBtn(d[0],d[1],false));COINS.forEach(d=>moneyBtn(d[0],d[1],true));
+{const u=document.createElement("button");u.className="bn undo";u.textContent="↶";u.setAttribute("aria-label","Urungkan");u.addEventListener("click",undoGive);$("dcoin").appendChild(u)}
 $("rs").addEventListener("click",()=>{if(B){B.give=0;sT("bg",rp(0))}});
 $("exitk").addEventListener("click",leaveCash);$("bc").addEventListener("click",leaveCash);
 $("ok").addEventListener("click",()=>{
