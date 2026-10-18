@@ -289,7 +289,7 @@ function chg(d){const k=AKc;if(k<0||MV)return;const id=S.shelves[k],mx=maxP(id),
 $("pm1").onclick=()=>chg(-500);$("pp1").onclick=()=>chg(500);
 
 /* ---------- buka / tutup toko ---------- */
-function toggleShop(){S.op=!S.op;drawSign();msg(S.op?"🔓 Toko DIBUKA. Selamat berjualan!":"🔒 Toko DITUTUP. Pelanggan baru tidak masuk.");SFX.bell();vib(15);hKick();save()}
+function toggleShop(){S.op=!S.op;if(S.op)spawnT=6+Math.random()*6;drawSign();msg(S.op?"🔓 Toko DIBUKA. Selamat berjualan!":"🔒 Toko DITUTUP. Pelanggan baru tidak masuk.");SFX.bell();vib(15);hKick();save()}
 
 /* ---------- sampah ---------- */
 const TC=["#e8e8e8","#c9a06a","#5aa9e6","#e05b4f","#f2c14e"];
@@ -325,6 +325,34 @@ function spawn(){
  SFX.bell();cs.push({m,ty,pat:ty==="rush"?45:ty==="bulk"?150:120,qris:Math.random()<(S.mach>=3?.6:.35),mv:false,x:W()-2.5,z:8,wants,cart:[],st:"in",i:0,t:0,wait:0,qt:0,sp:(ty==="rush"?2.5:1.5)+Math.random()*.5,off:(Math.random()-.5)*1.4,rd:false})}
 function mvTo(c,tx,tz,dt){const dx=tx-c.x,dz=tz-c.z,d=Math.hypot(dx,dz);if(d<.08){c.mv=false;return true}c.mv=true;const s=Math.min(d,c.sp*dt);c.x+=dx/d*s;c.z+=dz/d*s;c.m.rotation.y=Math.atan2(dx,dz);return false}
 const EXIT=()=>[[W()-2.5,4.8],[W()-2.5,8.5]];
+      //rubah
+      /* ---------- jalur pelanggan: menghindari rak ---------- */
+function segHit(ax,az,bx,bz,o,m){
+ const e=.001,x0=o.x-o.hx-m+e,x1=o.x+o.hx+m-e,z0=o.z-o.hz-m+e,z1=o.z+o.hz+m-e;
+ let t0=0,t1=1;const dx=bx-ax,dz=bz-az;
+ for(const [p,d,lo,hi] of [[ax,dx,x0,x1],[az,dz,z0,z1]]){
+  if(Math.abs(d)<1e-9){if(p<=lo||p>=hi)return false}
+  else{let a=(lo-p)/d,b=(hi-p)/d;if(a>b){const t=a;a=b;b=t}t0=Math.max(t0,a);t1=Math.min(t1,b);if(t0>=t1)return false}}
+ return true}
+function route(ax,az,bx,bz){
+ const m=.45;
+ const free=(px,pz,qx,qz)=>!obst.some(o=>segHit(px,pz,qx,qz,o,m));
+ if(free(ax,az,bx,bz))return[[bx,bz]];
+ const N=[[ax,az],[bx,bz]];
+ obst.forEach(o=>{for(const sx of[-1,1])for(const sz of[-1,1]){
+  const px=o.x+sx*(o.hx+m+.06),pz=o.z+sz*(o.hz+m+.06);
+  if(px>.4&&px<W()-.4&&pz>-5.6&&pz<5.8&&!obst.some(q=>Math.abs(px-q.x)<q.hx+m&&Math.abs(pz-q.z)<q.hz+m))N.push([px,pz])}});
+ const n=N.length,d=Array(n).fill(1e9),pv=Array(n).fill(-1),dn=Array(n).fill(false);d[0]=0;
+ for(let it=0;it<n;it++){let u=-1;for(let i=0;i<n;i++)if(!dn[i]&&(u<0||d[i]<d[u]))u=i;if(u<0||d[u]>=1e9)break;dn[u]=true;if(u===1)break;
+  for(let v=0;v<n;v++)if(!dn[v]){const w=Math.hypot(N[u][0]-N[v][0],N[u][1]-N[v][1]);if(d[u]+w<d[v]&&free(N[u][0],N[u][1],N[v][0],N[v][1])){d[v]=d[u]+w;pv[v]=u}}}
+ if(pv[1]<0)return[[bx,bz]];
+ const p=[];for(let i=1;i>0;i=pv[i])p.unshift(N[i]);return p}
+function walk(c,tx,tz,dt){
+ if(!c.rt||c.rt.x!==tx||c.rt.z!==tz||c.rt.o!==obst)c.rt={x:tx,z:tz,o:obst,p:route(c.x,c.z,tx,tz)};
+ const p=c.rt.p;
+ while(p.length>1&&Math.hypot(p[0][0]-c.x,p[0][1]-c.z)<.12)p.shift();
+ if(p.length>1){mvTo(c,p[0][0],p[0][1],dt);return false}
+ return mvTo(c,tx,tz,dt)} //rubah
 function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
 function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.push(i.pid)});
  c.cm=u.map((id,k)=>{const m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(k%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(k/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
@@ -332,12 +360,12 @@ function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.pus
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
-  if(c.st==="in"){if(mvTo(c,W()-2.5,4.8,dt))c.st="shop"}
+  if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt))c.st="shop"}
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(!w){if(c.cart.length){c.st="queue";c.qt=now;c.wait=0}else out(c,1,"st")}
-   else{const k=S.shelves.indexOf(w.pid);if(k<0)c.i++;else{const p=stand(k,c.off);if(mvTo(c,p[0],p[1],dt)){c.t+=dt;if(c.t>1){const n=Math.min(w.q,S.stock[w.pid]);if(n>0){S.stock[w.pid]-=n;c.cart.push({pid:w.pid,q:n});refresh(k);SFX.pop();if(Math.random()<.22)drop(c.x,c.z)}c.i++;c.t=0}}}}}
-  else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(mvTo(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
-  else if(c.st==="out"){const p=c.path[0];if(p&&mvTo(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
+   else{const k=S.shelves.indexOf(w.pid);if(k<0)c.i++;else{const p=stand(k,c.off);if(walk(c,p[0],p[1],dt)){c.t+=dt;if(c.t>1){const n=Math.min(w.q,S.stock[w.pid]);if(n>0){S.stock[w.pid]-=n;c.cart.push({pid:w.pid,q:n});refresh(k);SFX.pop();if(Math.random()<.22)drop(c.x,c.z)}c.i++;c.t=0}}}}}
+  else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(walk(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat)out(c,1,"an")}
+  else if(c.st==="out"){const p=c.path[0];if(p&&walk(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
 
