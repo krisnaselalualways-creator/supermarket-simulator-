@@ -153,3 +153,15 @@ input[type=range]{width:100%;accent-color:#3fb97d}
 @media (max-width:360px){:root{--fs:11px}}
 @media (min-width:900px) and (min-height:600px){.card{border-radius:22px;align-self:center}.modal{align-items:center}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---------- tombol uang rupiah ---------- */
+#dn{margin:10px 0}
+.mrow{display:grid;gap:7px;margin-bottom:8px}
+#dbill{grid-template-columns:repeat(3,1fr)}
+#dcoin{grid-template-columns:repeat(3,1fr);align-items:center}
+.bn{border-radius:10px;padding:1em .2em;font-weight:900;font-size:calc(var(--fs) + 1px);color:#1d2433;
+border:2px solid #0003;box-shadow:0 3px 0 #0004;transition:transform .06s;line-height:1.1}
+.bn:active{transform:translateY(3px);box-shadow:none}
+.bn.cn{border-radius:50%;width:100%;max-width:70px;aspect-ratio:1/1;padding:0;justify-self:center;
+display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--fs) - 1px)}
+.bn.cn small{font-size:calc(var(--fs) - 4px);opacity:.7}
+.bn.undo{background:#4f91b7;color:#fff;justify-self:center;width:100%;max-width:70px;padding:.9em 0;font-size:calc(var(--fs) + 5px)}
