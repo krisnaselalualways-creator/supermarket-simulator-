@@ -232,7 +232,7 @@ P.forEach(p=>{const s=PRODS[p.id](),r=mkMerge(s.parts,s.tw,s.th);GE[p.id]=r.g;GH
  const m=new THREE.MeshLambertMaterial({map:mkAtlas(s.tw,s.th,s.mm[0],s.mm[1],s.art),vertexColors:true});m.userData.keep=1;IM[p.id]=m});
 /* ---------- aset bersama ---------- */
 const LM=new THREE.MeshBasicMaterial({color:"#fffbe8"}),winM=new THREE.MeshBasicMaterial({color:"#bcd9ee"});
-const OLM=new THREE.MeshBasicMaterial({color:"#2bff3a",side:THREE.BackSide});
+const OLM=new THREE.MeshBasicMaterial({color:"#2bff3a",side:THREE.BackSide,visible:false});
 const SHM=new THREE.MeshBasicMaterial({color:"#000",transparent:true,opacity:.22,depthWrite:false});
 const CIRC=new THREE.CircleGeometry(.32,12),SPHG=new THREE.SphereGeometry(.17,8,6);
 const FT=(()=>{const t=canvasTex(128,128,g=>{g.fillStyle="#e6e1d2";g.fillRect(0,0,128,128);g.fillStyle="#d7d2c0";g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.strokeStyle="#bdb8a4";g.lineWidth=2;g.strokeRect(0,0,128,128);g.strokeRect(0,0,64,64);g.strokeRect(64,64,64,64)});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t})();
