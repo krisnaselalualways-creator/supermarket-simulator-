@@ -622,7 +622,7 @@ function phone(){
  else if(tab===1){const free=P.filter(p=>!S.shelves.includes(p.id)),used=S.shelves.filter(Boolean).length,full=used>=slotsN();h+=HIRE()+"<small class='note'>Rak terpakai "+used+"/"+slotsN()+"</small>";
   if(full)h+="<p class='note'>Slot penuh. Perluas lahan dulu.</p>";else if(!free.length)h+="<p class='note'>Semua produk sudah punya rak.</p>";else free.forEach(p=>h+=row("Rak "+p.n,"",bt_("rak",p.id,rp(150000),S.money<150000)))}
  else if(tab===6){h+="<small class='note'>Pesanan online: berdiri dekat meja kasir, lalu ketuk harga untuk mengemas. Barang diambil dari stok rak."+(S.worker?" Pegawai pengemas akan mengemas otomatis jika stok cukup.":"")+"</small>";if(!ORD.length)h+="<p class='note'>Belum ada pesanan. Pesanan masuk saat toko buka.</p>";
-  ORD.forEach(o=>{const miss=o.items.filter(i=>(S.stock[i.id]||0)<i.q);h+=row("<b>Pesanan #"+o.id+"</b> • <span id='ot-"+o.id+"'>"+Math.ceil(o.t)+"d</span>",o.items.map(i=>PP[i.id].n+" ×"+i.q).join(", ")+(miss.length?"<br><span class='bad'>Stok kurang: "+miss.map(i=>PP[i.id].n).join(", ")+"</span>":""),bt_("pack",o.id,rp(o.rw),miss.length))})}
+  ORD.forEach(o=>{const miss=o.items.filter(i=>(S.stock[i.id]||0)<i.q);h+=row("<b>Pesanan #"+o.id+"</b> • <span id='ot-"+o.id+"'>"+Math.ceil(o.t)+"d</span>",o.items.map(i=>PP[i.id].n+" ×"+i.q).join(", ")+(miss.length?"<br><span class='bad'>Stok kurang: "+miss.map(i=>PP[i.id].n).join(", ")+"</span>":""),bt_("pack",o.id,rp(o.rw),miss.length)+bt_("tolak",o.id,"✖ Tolak"))})}
  else if(tab===7){const a=S.rev;h+="<small class='note'>⭐ "+avgRev().toFixed(1).replace(".",",")+" rata-rata ulasan terakhir ("+a.length+"). Ulasan memengaruhi jumlah pelanggan baru.</small>";if(!a.length)h+="<p class='note'>Belum ada ulasan.</p>";
   a.slice(0,10).forEach(r=>{h+=row("<b class='"+(r.s>=4?"good":r.s>=3?"mid":"bad")+"'>"+"★".repeat(r.s)+"☆".repeat(5-r.s)+"</b>","“"+r.t+"” • Hari "+r.d)})}
  else if(tab===5){h+="<small class='note'>Level mesin: "+S.mach+" • "+MACH[S.mach].n+". Mesin kasir ada di meja kasir (monitor besar di kiri).</small>";
@@ -639,6 +639,7 @@ $("pb").addEventListener("click",e=>{
  if(a==="stok"){const c=cost(PP[i]);if(S.money<c)return;if(S.boxes.length>=10){msg("Area kardus penuh! Isi rak dulu.");return}S.money-=c;S.boxes.push({id:i,q:12});drawBoxes();SFX.buy();msg("Kardus "+PP[i].n+" tiba di dekat pintu 📦")}
  else if(a==="rak"){if(S.money<150000)return;S.money-=150000;S.shelves[S.shelves.findIndex(x=>!x)]=i;buildStore();SFX.buy();msg("Rak "+PP[i].n+" dipasang. Isi stoknya!")}
  else if(a==="pack"){const o=ORD.find(x=>x.id===+i);if(o)packOrder(o,false)}
+     else if(a==="tolak"){const o=ORD.find(x=>x.id===+i);if(o){ORD=ORD.filter(x=>x!==o);SFX.tap();msg("🚫 Pesanan #"+o.id+" ditolak.");phone()}}
  else if(a==="mach"){const l=+i,m=MACH[l];if(!m||S.mach!==l-1||S.money<m.c)return;S.money-=m.c;S.mach=l;buildStore();SFX.buy();msg("Upgrade: "+m.n+"!")}
  else if(a==="hire"){if(S.money<300000||S.worker)return;S.money-=300000;S.worker=true;buildStore();SFX.buy();msg("Pegawai pengemas mulai bekerja! Gaji Rp30.000/hari.")}
  else if(a==="hrg"){S.price[i]=cl(pr(i)+(+b.dataset.d),500,maxP(i));refresh(S.shelves.indexOf(i))}
