@@ -232,7 +232,7 @@ P.forEach(p=>{const s=PRODS[p.id](),r=mkMerge(s.parts,s.tw,s.th);GE[p.id]=r.g;GH
  const m=new THREE.MeshLambertMaterial({map:mkAtlas(s.tw,s.th,s.mm[0],s.mm[1],s.art),vertexColors:true});m.userData.keep=1;IM[p.id]=m});
 /* ---------- aset bersama ---------- */
 const LM=new THREE.MeshBasicMaterial({color:"#fffbe8"}),winM=new THREE.MeshBasicMaterial({color:"#bcd9ee"});
-const OLM=new THREE.MeshBasicMaterial({color:"#ff00ff",side:THREE.BackSide});
+const OLM=new THREE.MeshBasicMaterial({color:"#2bff3a",side:THREE.BackSide});
 const SHM=new THREE.MeshBasicMaterial({color:"#000",transparent:true,opacity:.22,depthWrite:false});
 const CIRC=new THREE.CircleGeometry(.32,12),SPHG=new THREE.SphereGeometry(.17,8,6);
 const FT=(()=>{const t=canvasTex(128,128,g=>{g.fillStyle="#e6e1d2";g.fillRect(0,0,128,128);g.fillStyle="#d7d2c0";g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.strokeStyle="#bdb8a4";g.lineWidth=2;g.strokeRect(0,0,128,128);g.strokeRect(0,0,64,64);g.strokeRect(64,64,64,64)});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t})();
@@ -476,7 +476,6 @@ function walk(c,tx,tz,dt){
 function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
 function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.push(i.pid)});
  const od=u.map((_,k)=>k).sort((a,b)=>GH[u[b]]-GH[u[a]]);
-  const od=u.map((_,k)=>k).sort((a,b)=>GH[u[b]]-GH[u[a]]);
  c.cm=u.map((id,k)=>{const s=od.indexOf(k),m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(s%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(s/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
   const ol=new THREE.Mesh(GE[id],OLM);ol.scale.set(1.12,1.12,1.12);ol.visible=false;m.add(ol);m.userData.ol=ol;sc.add(m);return m});SFX.pop()}
 function updC(dt,now){
@@ -508,7 +507,7 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=true});drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
