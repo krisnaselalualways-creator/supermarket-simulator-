@@ -295,7 +295,7 @@ function buildStore(){
  if(S.mach>=3){box(.14,.22,.1,"#444c58",3.2,1.1,3.88,world);box(.1,.07,.012,"#8ee5c1",3.2,1.17,3.82,world)}
  if(S.mach>=4){box(.22,.12,.16,"#2b2f3a",1.7,1.04,3.85,world);box(.12,.14,.01,"#fff",1.7,1.17,3.93,world)}
  if(S.mach>=5)box(.7,.015,.02,"#6fe39a",2.05,1.1,3.89,world);
- add(label("KASIR","",false)).position.set(3,2.1,3.5);obst.push({x:3,z:3.5,hx:1.5,hz:.5});
+ add(signSprite("KASIR","#2f9e6e")).position.set(3,2.15,3.5);obst.push({x:3,z:3.5,hx:1.5,hz:.5});
  bxG=new THREE.Group();world.add(bxG);drawBoxes();
  // dekorasi
  const hd=add(label("MINI SUPERMARKET","Belanja hemat & lengkap",true));hd.scale.set(1.9,1.9,1);hd.position.set(w/2,2.5,-5.85);
