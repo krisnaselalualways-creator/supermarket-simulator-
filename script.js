@@ -507,7 +507,7 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=true});drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=FALSE});drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
