@@ -256,7 +256,7 @@ function animPerson(m,mv,now,seed){const a=mv?Math.sin(now*9+seed*7):0;m.userDat
 /* ---------- dunia toko ---------- */
 let world=null,slots=[],obst=[],shG=[],bxG=null,mDr=null,dL=null,dR=null,dInd=null,signCv=null,signTx=null,wkIc=null,scrCv=null,scrTx=null,rvM=null,gh=null;
 const W=()=>14+6*S.land,slotsN=()=>2*(3+2*S.land);
-function disposeWorld(){if(!world)return;world.traverse(o=>{if(o.material&&o.material.map){o.material.map.dispose();o.material.dispose()}});sc.remove(world)}
+function disposeWorld(){if(!world)return;world.traverse(o=>{if(o.material&&o.material.map&&!(o.material.userData&&o.material.userData.keep)){o.material.map.dispose();o.material.dispose()}});sc.remove(world)}
 
 /* label harga di depan rak: digambar ulang di canvas yang sama (hemat memori) */
 function drawTag(k){const o=shG[k];if(!o)return;const id=S.shelves[k],t=o.tag.userData.c,g=t.getContext("2d");
@@ -475,7 +475,9 @@ function walk(c,tx,tz,dt){
  return mvTo(c,tx,tz,dt)} //rubah
 function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
 function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.push(i.pid)});
- c.cm=u.map((id,k)=>{const m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(k%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(k/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
+ const od=u.map((_,k)=>k).sort((a,b)=>GH[u[b]]-GH[u[a]]);
+  const od=u.map((_,k)=>k).sort((a,b)=>GH[u[b]]-GH[u[a]]);
+ c.cm=u.map((id,k)=>{const s=od.indexOf(k),m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(s%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(s/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
   const ol=new THREE.Mesh(GE[id],OLM);ol.scale.set(1.12,1.12,1.12);ol.visible=false;m.add(ol);m.userData.ol=ol;sc.add(m);return m});SFX.pop()}
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
