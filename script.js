@@ -308,7 +308,7 @@ function drawTag(k){const o=shG[k];if(!o)return;const id=S.shelves[k],t=o.tag.us
  fit(g,rp(pr(id)),44,230,1);g.fillText(rp(pr(id)),128,52);g.fillStyle="#666";g.font="22px sans-serif";g.fillText("Stok "+S.stock[id],128,82);o.tag.needsUpdate=true}
 function refresh(k){const o=shG[k];if(!o)return;const n=Math.min(12,S.stock[S.shelves[k]]);for(let i=0;i<12;i++)o.items[i].visible=i<n;drawTag(k)}
 
-function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);g.font="bold 20px sans-serif";g.fillText("08.00 - 21.00",128,108);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
+function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
 function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,136);g.fillStyle="#8ee5c1";g.textAlign="left";g.font="bold 18px monospace";g.fillText((a||"").slice(0,16),10,24);g.textAlign="right";g.fillText(b||"",246,24);
  g.textAlign="center";g.font="bold 22px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,66);g.font="bold 40px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,112);scrTx.needsUpdate=true;
  sT("lcdv",t==null?"Rp0":rp(t));sT("lcdi",a&&b?a+"  "+b:(a||""))}
@@ -624,7 +624,7 @@ function newOrder(){const av=P.filter(p=>S.shelves.includes(p.id));if(!av.length
 function courier(){const m=person("#2e9e5b","#222",pick(SKIN),"#222",true);sc.add(m);cr.push({m,x:W()-2.5,z:8,sp:2.6,mv:false,path:[[W()-2.5,4.8],[3.2,2.3],[W()-2.5,4.8],[W()-2.5,8.5]]})}
 function updCr(dt,now){for(const c of cr){const p=c.path[0];if(p){if(mvTo(c,p[0],p[1],dt))c.path.shift()}else{sc.remove(c.m);c.dead=true}c.m.position.set(c.x,animPerson(c.m,c.mv,now,0),c.z)}cr=cr.filter(c=>!c.dead)}
 function ordTick(dt){
- trTick(dt);ordT-=dt;if(ordT<=0&&dayT<DAYL-40&&ORD.length<3&&S.op){newOrder();ordT=(40+Math.random()*30)*1.5}
+ trTick(dt);ordT-=dt;if(ordT<=0&&ORD.length<3&&S.op){newOrder();ordT=(40+Math.random()*30)*1.5}
  if(S.worker)[...ORD].forEach(o=>{const ok=!o.items.some(it=>(S.stock[it.id]||0)<it.q);if(ok){o.pk=(o.pk===undefined?3+Math.random()*3:o.pk)-dt;if(o.pk<=0)packOrder(o,true)}else o.pk=undefined});
  if(wkIc)wkIc.visible=ORD.some(o=>o.pk!==undefined&&o.pk>0);
  ORD.forEach(o=>o.t-=dt);const ex=ORD.filter(o=>o.t<=0);
@@ -674,7 +674,7 @@ function phone(){
  else if(tab===6){h+="<small class='note'>Pesanan online: berdiri dekat meja kasir, lalu ketuk harga untuk mengemas. Barang diambil dari stok rak."+(S.worker?" Pegawai pengemas akan mengemas otomatis jika stok cukup.":"")+"</small>";if(!ORD.length)h+="<p class='note'>Belum ada pesanan. Pesanan masuk saat toko buka.</p>";
   ORD.forEach(o=>{const miss=o.items.filter(i=>(S.stock[i.id]||0)<i.q);h+=row("<b>Pesanan #"+o.id+"</b> • <span id='ot-"+o.id+"'>"+Math.ceil(o.t)+"d</span>",o.items.map(i=>PP[i.id].n+" ×"+i.q).join(", ")+(miss.length?"<br><span class='bad'>Stok kurang: "+miss.map(i=>PP[i.id].n).join(", ")+"</span>":""),bt_("pack",o.id,rp(o.rw),miss.length)+bt_("tolak",o.id,"✖ Tolak"))})}
  else if(tab===7){const a=S.rev;h+="<small class='note'>⭐ "+avgRev().toFixed(1).replace(".",",")+" rata-rata ulasan terakhir ("+a.length+"). Ulasan memengaruhi jumlah pelanggan baru.</small>";if(!a.length)h+="<p class='note'>Belum ada ulasan.</p>";
-  a.slice(0,10).forEach(r=>{h+=row("<b class='"+(r.s>=4?"good":r.s>=3?"mid":"bad")+"'>"+"★".repeat(r.s)+"☆".repeat(5-r.s)+"</b>","“"+r.t+"” • Hari "+r.d)})}
+  a.slice(0,10).forEach(r=>{h+=row("<b class='"+(r.s>=4?"good":r.s>=3?"mid":"bad")+"'>"+"★".repeat(r.s)+"☆".repeat(5-r.s)+"</b>","“"+r.t+"”")})}
  else if(tab===5){h+="<small class='note'>Level mesin: "+S.mach+" • "+MACH[S.mach].n+". Mesin kasir ada di meja kasir (monitor besar di kiri).</small>";
   for(let l=2;l<=5;l++){const m=MACH[l],own=S.mach>=l,can=S.mach===l-1&&S.money>=m.c;h+=row(m.n,m.d+(own||S.mach===l-1?"":" • butuh level sebelumnya"),bt_("mach",l,own?"✓ Dimiliki":rp(m.c),own||!can))}}
  else if(tab===3){h+="<small class='note'>Harga jual per barang (kelipatan Rp500). Terlalu mahal = pelanggan malas beli. Bisa juga diubah dengan mengarahkan titik ke rak.</small>";
@@ -703,7 +703,7 @@ const HELP=[
 ["📦 Isi rak","Dekati kardus → ketuk ✋ untuk mengangkat → bawa ke rak yang cocok → ✋ lagi untuk mengisi (tunggu sampai terisi, jangan menjauh). Satu rak maksimal 24 barang. Kardus kosong jadi sampah."],
 ["🧾 Mode kasir","Arahkan titik ke meja kasir lalu ketuk ✋. Kamu masuk mode kasir dan pelanggan dilayani satu per satu otomatis: ketuk barang agar loncat ke mesin (harga terhitung di layar), pelanggan memberi uang, ketik kembalian di keypad lalu OK (QRIS tanpa kembalian). Ketuk KELUAR DARI KASIR kalau sudah tidak mau melayani. Waspada: ⏱️ buru-buru, 🛒 borong, 💬 minta diskon."],
 ["🏷️ Harga & rak","Arahkan titik ke rak: ubah harga dengan − / +, atau ketuk ✋ untuk mengangkat rak (✋ lagi untuk menaruh, ↻ untuk memutar). Harga terlalu mahal membuat toko sepi."],
-["📅 Hari & biaya","Tiap hari toko mulai TUTUP: arahkan titik ke pintu lalu ketuk ✋ Buka toko (waktu tetap berjalan). Toko tutup otomatis jam 21:00. Tiap hari ada sewa & listrik. Capai target untung untuk bonus. Pegawai pengemas (Ponsel → Properti) mengemas pesanan online otomatis. Sampah pelanggan: pungut dengan ✋ (maks 5) lalu buang ke tong sampah di dekat meja kasir. Toko kotor menurunkan rating."]];
+["🕹️ Santai","Tidak ada hari, sewa, atau target. Buka atau tutup toko kapan saja di pintu 🚪 (ketuk ✋). Jam di atas hanya mengatur siang dan malam. Sampah pelanggan: pungut dengan ✋ (maks 5) lalu buang ke tong sampah di dekat meja kasir. Toko kotor menurunkan rating."]];
 let hi=0,hp=false;
 function showHelp(i){hi=i;sT("hh",HELP[i][0]);sT("hb",HELP[i][1]);$("hdots").innerHTML=HELP.map((_,j)=>'<i class="'+(j===i?"on":"")+'"></i>').join("");$("hprev").style.visibility=i?"visible":"hidden";sT("hnext",i===HELP.length-1?"Selesai ✓":"Lanjut ▶");$("help").hidden=false;if(!SUMV&&!hp){SUMV=true;hp=true}}
 function closeHelp(){$("help").hidden=true;S.help=1;save();if(hp){SUMV=false;hp=false}}
@@ -737,11 +737,11 @@ function frame(t){
   if(spawnT<=0&&dayT<DAYL&&S.op){spawnT=cl(9/((S.rating*.6+avgRev()*.4)/3),4,18)*(.7+Math.random()*.6)*(ev?ev.k==="ramai"?.5:ev.k==="hujan"?2:1:1);spawn()}
   evT-=dt;if(ev){ev.t-=dt;if(ev.t<=0){ev=null;msg("Event selesai.");evT=60+Math.random()*60}}else if(evT<=0){const e=pick(EVS);ev={k:e.k,n:e.n,t:e.t};msg(e.n+"!");SFX.bell()}
   updC(dt,now);updCr(dt,now);ordTick(dt);
-  if(dayT>=DAYL){if(!closedMsg){closedMsg=true;S.op=false;drawSign();msg("🌙 Toko tutup jam 21.00. Layani pelanggan terakhir!")}if(!B){const rest=cs.filter(c=>c.st!=="out").length;if(rest===0||dayT>=DAYL+40)endDay()}}}
+  if(dayT>=DAYL){dayT=0;S.dt=0}}
  /* langit & jam */
  const hh=8+dayT/SPH,sun=.5+.5*Math.cos(2*Math.PI*(hh-12)/24);
  sc.background.copy(NIGHT).lerp(DAY,sun);winM.color.copy(sc.background);hemi.intensity=.5+.6*sun;dl.intensity=.08+.4*sun;
- sT("hc","📅 Hari "+S.day+" • 🕒 "+String(Math.floor(hh)).padStart(2,"0")+":"+String(Math.floor(hh%1*6)*10).padStart(2,"0")+(sun<.25?" 🌙":" ☀️")+(S.op?" • BUKA":" • TUTUP"));
+ sT("hc","🕒 "+String(Math.floor(hh)).padStart(2,"0")+":"+String(Math.floor(hh%1*6)*10).padStart(2,"0")+(sun<.25?" 🌙":" ☀️")+(S.op?" • BUKA":" • TUTUP"));
  const pc=Math.round(cl(dayT/DAYL,0,1)*100);if(pc!==lastPc){lastPc=pc;$("dayb").style.width=pc+"%"}
  /* kamera, tangan */
  if(CASH){const p=cashPose(),k2=Math.min(1,dt*6);cam.position.x+=(p.x-cam.position.x)*k2;cam.position.y+=(p.y-cam.position.y)*k2;cam.position.z+=(p.z-cam.position.z)*k2;cam.lookAt(p.tx,p.ty,p.tz)}
@@ -775,7 +775,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)save();else
 addEventListener("pagehide",save);   
  /* ---------- mulai ---------- */
 buildStore();
-if(S.sum){SUMV=true;showSum(S.sum.t,S.sum.h)}else if(!S.help)showHelp(0);
+S.sum=null;if(!S.help)showHelp(0);
 setUI();requestAnimationFrame(loop);setInterval(save,10000);
 requestAnimationFrame(()=>requestAnimationFrame(()=>{const b=$("boot");b.classList.add("hide");setTimeout(()=>{b.style.display="none"},500)}));
 })();
