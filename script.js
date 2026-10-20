@@ -25,7 +25,7 @@ const PP={};P.forEach(p=>PP[p.id]=p);
 const SPH=28,DAYL=13*SPH,SC=SPH/10,fixk=v=>Math.round(v*SC/500)*500;   // 1 jam game = 28 detik
 const maxP=id=>Math.round(PP[id].p*2/500)*500;
 const pr=id=>Math.min(S.price[id]||PP[id].p,maxP(id));
-const mc=id=>Math.round(PP[id].p*.7);                    // modal per barang
+const mc=id=>Math.round(PP[id].p*.7);                     // modal per barang
 const def=()=>({money:300000,rating:3,served:0,land:0,
  stock:{mie:12,air:12,roti:8,susu:0,keripik:0,sabun:0,teh:0,kopi:0,beras:0,minyak:0},
  shelves:["mie","air","roti"],boxes:[],carry:null,price:{},pos:{},day:1,dt:0,
@@ -482,7 +482,7 @@ function spawn(){
  if(cs.length>=4+S.land+(ev&&ev.k==="ramai"?2:0))return;
  const av=P.filter(p=>S.shelves.includes(p.id)&&S.stock[p.id]>0&&Math.random()<cl(1.6-.6*pr(p.id)/p.p,.15,1));if(!av.length)return;
  const R0=Math.random(),ty=R0<.15?"rush":R0<.25?"bulk":R0<.35?"tawar":"normal";
-const n=ty==="rush"?1:ty==="bulk"?2+Math.floor(Math.random()*2):1+Math.floor(Math.random()*2);
+ const n=ty==="rush"?1:ty==="bulk"?2+Math.floor(Math.random()*2):1+Math.floor(Math.random()*2);
  const wants=av.sort(()=>Math.random()-.5).slice(0,n).map(p=>({pid:p.id,q:1+Math.floor(Math.random()*2)}));
  const m=person(pick(SH),pick(HAIR),pick(SKIN),pick(PANTS),Math.random()<.25);sc.add(m);
  if(ty!=="normal"){const ic=emoSprite({rush:"⏱️",bulk:"🛒",tawar:"💬"}[ty]);ic.position.set(0,2.05,0);m.add(ic)}
@@ -640,13 +640,13 @@ function showSum(t,h){sT("st",t);$("sb").innerHTML=h;sT("sn","▶ Mulai hari ke-
 function endDay(){
  SUMV=true;ORD=[];cr.forEach(c=>sc.remove(c.m));cr=[];ordT=20;
  cs.forEach(c=>{if(c.cm)c.cm.forEach(m=>sc.remove(m));sc.remove(c.m)});cs=[];leaveCash();
- const D=S.D,n=S.shelves.filter(Boolean).length,rent=40000,pw=fixk(2000)*n,wg=S.worker?30000:0,fix=rent+pw+wg,net=D.rev-D.cogs-fix;
- const tg=Math.min(fixk(40000)+(S.day-1)*fixk(10000),fixk(250000)),old=S.debt||0,due=fix+old,pay=Math.min(S.money,due);
+ const D=S.D,n=S.shelves.filter(Boolean).length,rent=25000,pw=fixk(1200)*n,wg=S.worker?30000:0,fix=rent+pw+wg,net=D.rev-D.cogs-fix;
+ const tg=Math.min(fixk(20000)+(S.day-1)*fixk(6000),fixk(150000)),old=S.debt||0,due=fix+old,pay=Math.min(S.money,due);
  S.money-=pay;S.debt=due-pay;let warn="";
  if(S.debt>0){const fine=Math.round(S.debt*.1/500)*500;S.debt+=fine;rate(1);rate(1);warn="⚠️ Uang kurang! Tunggakan "+rp(S.debt)+" (termasuk denda "+rp(fine)+"). Rating turun."}
  let bonus=0;if(net>=tg){bonus=Math.round(tg*.1/500)*500;S.money+=bonus}
  rollMarket();S.pn=net;
-    const m=v=>(v<0?"−":"")+rp(Math.abs(v));
+ const m=v=>(v<0?"−":"")+rp(Math.abs(v));
  const det='<div class="sumdet"><b>Rincian hari ini</b>'+row("Pelanggan dilayani",D.served+(D.on?" • pesanan online "+D.on:""),"")+
   row("Pendapatan","",m(D.rev))+row("Modal barang","",m(-D.cogs))+row("<b>Untung kotor</b>","",'<b>'+m(D.rev-D.cogs)+"</b>")+
   row("Sewa toko","",m(-rent))+row("Listrik ("+n+" rak)","",m(-pw))+(wg?row("Gaji pegawai","",m(-wg)):"")+
@@ -734,7 +734,7 @@ function frame(t){
  for(const o of obst){const dx=px-o.x,dz=pz-o.z,ox=o.hx+.35-Math.abs(dx),oz=o.hz+.35-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)px+=Math.sign(dx||1)*ox;else pz+=Math.sign(dz||1)*oz}}
  /* hari, pelanggan, event */
  if(!SUMV){dayT+=dt;S.dt=dayT;spawnT-=dt;
-  if(spawnT<=0&&dayT<DAYL&&S.op){spawnT=cl(13/((S.rating*.6+avgRev()*.4)/3),4,18)*(.7+Math.random()*.6)*(ev?ev.k==="ramai"?.5:ev.k==="hujan"?2:1:1);spawn()}
+  if(spawnT<=0&&dayT<DAYL&&S.op){spawnT=cl(9/((S.rating*.6+avgRev()*.4)/3),4,18)*(.7+Math.random()*.6)*(ev?ev.k==="ramai"?.5:ev.k==="hujan"?2:1:1);spawn()}
   evT-=dt;if(ev){ev.t-=dt;if(ev.t<=0){ev=null;msg("Event selesai.");evT=60+Math.random()*60}}else if(evT<=0){const e=pick(EVS);ev={k:e.k,n:e.n,t:e.t};msg(e.n+"!");SFX.bell()}
   updC(dt,now);updCr(dt,now);ordTick(dt);
   if(dayT>=DAYL){if(!closedMsg){closedMsg=true;S.op=false;drawSign();msg("🌙 Toko tutup jam 21.00. Layani pelanggan terakhir!")}if(!B){const rest=cs.filter(c=>c.st!=="out").length;if(rest===0||dayT>=DAYL+40)endDay()}}}
