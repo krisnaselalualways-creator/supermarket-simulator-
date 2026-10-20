@@ -240,16 +240,47 @@ const SKIN=["#f3cfa6","#e0b088","#c68a5c","#8d5a3b"],PANTS=["#3b4468","#2f3e46",
 const HAIR=["#3b2a20","#6b4a2f","#d9722b","#222"],SH=["#e0a458","#a98ad9","#6fc4d9","#e88a8a","#e8d27a"];
 
 /* ---------- orang (pelanggan, kurir, pegawai) ---------- */
+/* geometri badan (dipakai bersama semua orang, jadi ringan) */
+const PGM={cyl:(a,b,h,n)=>{const k=a+"|"+b+"|"+h+"|"+n;return PGM[k]||(PGM[k]=new THREE.CylinderGeometry(a,b,h,n||10))},
+ sph:(r,w,h)=>{const k="s"+r+"|"+w+"|"+h;return PGM[k]||(PGM[k]=new THREE.SphereGeometry(r,w||10,h||8))}};
+const PHEAD=new THREE.SphereGeometry(1,14,10),PCAP=new THREE.SphereGeometry(1,14,8,0,Math.PI*2,0,Math.PI*.44),PSH=new THREE.SphereGeometry(1,10,6,0,Math.PI*2,0,Math.PI*.5);
+function pm(geo,c,x,y,z,p,sx,sy,sz){const m=new THREE.Mesh(geo,mat(c));m.position.set(x,y,z);if(sx)m.scale.set(sx,sy,sz);p.add(m);return m}
 function person(col,hair,skin,pants,hat,nb){
- skin=skin||"#f3cfa6";pants=pants||"#3b4468";const g=new THREE.Group();
+ skin=skin||"#f3cfa6";pants=pants||"#3b4468";const g=new THREE.Group(),shoe="#2b2623";
  const sh=new THREE.Mesh(CIRC,SHM);sh.rotation.x=-Math.PI/2;sh.position.y=.012;g.add(sh);
- box(.5,.9,.3,col,0,.75,0,g);
- g.userData.l=[box(.18,.6,.2,pants,-.12,.3,0,g),box(.18,.6,.2,pants,.12,.3,0,g)];
- g.userData.a=[box(.12,.55,.14,col,-.31,.8,0,g),box(.12,.55,.14,col,.31,.8,0,g)];
- const h=new THREE.Mesh(SPHG,mat(skin));h.position.y=1.38;g.add(h);
- box(.34,.12,.34,hair,0,1.5,0,g);if(hat)box(.46,.05,.46,hair,0,1.58,0,g);
- box(.04,.04,.02,"#222",-.06,1.4,.15,g);box(.04,.04,.02,"#222",.06,1.4,.15,g);
- if(!nb){box(.3,.16,.22,"#c0504d",.4,.5,.05,g);box(.3,.03,.22,"#8a3a38",.4,.59,.05,g)}
+ /* kaki: pivot di pinggul, celana + sepatu */
+ g.userData.l=[-1,1].map(s=>{const L=new THREE.Group();L.position.set(s*.105,.64,0);g.add(L);
+  pm(PGM.cyl(.085,.065,.58,9),pants,0,-.31,0,L);pm(PHEAD,shoe,0,-.6,.035,L,.075,.045,.115);return L});
+ /* pinggul + ikat pinggang */
+ pm(PGM.cyl(.2,.2,.14,12),pants,0,.66,0,g,1,1,.68);pm(PGM.cyl(.205,.205,.035,12),"#2a2a2a",0,.74,0,g,1,1,.68);
+ /* badan: bahu lebih lebar dari pinggang */
+ pm(PGM.cyl(.215,.185,.5,12),col,0,.99,0,g,1,1,.66);
+ pm(PSH,col,0,1.24,0,g,.215,.07,.14);
+ pm(PGM.cyl(.062,.07,.09,8),skin,0,1.3,0,g);                 /* leher */
+ pm(PGM.cyl(.075,.075,.025,8),"#ffffff",0,1.275,.012,g,1,1,1);   /* kerah */
+ /* tangan: pivot di bahu, lengan baju + lengan bawah + telapak */
+ g.userData.a=[-1,1].map(s=>{const A=new THREE.Group();A.position.set(s*.265,1.2,0);g.add(A);
+  pm(PGM.sph(.075,8,6),col,0,0,0,A);
+  pm(PGM.cyl(.062,.056,.27,8),col,0,-.14,0,A);
+  pm(PGM.cyl(.05,.042,.25,8),skin,0,-.39,0,A);
+  pm(PGM.sph(.052,8,6),skin,0,-.54,0,A);return A});
+ /* kepala: agak lonjong, ada telinga, hidung, mata, alis, mulut */
+ const hd=new THREE.Group();hd.position.set(0,1.44,0);g.add(hd);
+ pm(PHEAD,skin,0,0,0,hd,.135,.16,.145);
+ pm(PGM.sph(.028,6,5),skin,-.14,-.01,0,hd);pm(PGM.sph(.028,6,5),skin,.14,-.01,0,hd);
+ pm(PGM.sph(.026,6,5),skin,0,-.025,.15,hd,1,1.2,1);
+ [-1,1].forEach(s=>{pm(PGM.sph(.02,6,5),"#fafafa",s*.052,.015,.128,hd,1,1,.5);pm(PGM.sph(.011,6,5),"#1b1b1b",s*.052,.015,.14,hd);
+  pm(bgeo(.055,.014,.01),hair,s*.052,.058,.13,hd)});
+ pm(bgeo(.06,.012,.01),"#a8554f",0,-.075,.138,hd);
+ /* rambut: tutup kepala + rambut belakang (kadang panjang) */
+ pm(PCAP,hair,0,.015,-.012,hd,.15,.17,.158);
+ const long=Math.random()<.4;pm(PGM.sph(1,10,8),hair,0,-.01,-.06,hd,.15,long?.2:.14,.1);
+ if(long)pm(bgeo(.27,.24,.07),hair,0,-.13,-.1,hd);
+ /* topi */
+ if(hat){pm(PCAP,col,0,.04,0,hd,.158,.15,.166);pm(bgeo(.2,.012,.14),col,0,.035,.17,hd)}
+ /* tas belanja di tangan kanan */
+ if(!nb){const T=g.userData.a[1];pm(bgeo(.22,.2,.12),"#c0504d",0,-.66,.02,T);pm(bgeo(.22,.03,.12),"#8a3a38",0,-.56,.02,T);
+  const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.55,.02);T.add(hn)}
  return g}
 function animPerson(m,mv,now,seed){const a=mv?Math.sin(now*9+seed*7):0;m.userData.l[0].rotation.x=a*.6;m.userData.l[1].rotation.x=-a*.6;m.userData.a[0].rotation.x=-a*.5;m.userData.a[1].rotation.x=a*.5;return Math.abs(a)*.05}
 
@@ -295,7 +326,7 @@ function buildStore(){
  if(S.mach>=3){box(.14,.22,.1,"#444c58",3.2,1.1,3.88,world);box(.1,.07,.012,"#8ee5c1",3.2,1.17,3.82,world)}
  if(S.mach>=4){box(.22,.12,.16,"#2b2f3a",1.7,1.04,3.85,world);box(.12,.14,.01,"#fff",1.7,1.17,3.93,world)}
  if(S.mach>=5)box(.7,.015,.02,"#6fe39a",2.05,1.1,3.89,world);
- add(signSprite("KASIR","#2f9e6e")).position.set(3,2.15,3.5);obst.push({x:3,z:3.5,hx:1.5,hz:.5});
+ {const ks=add(signSprite("KASIR","#2f9e6e"));ks.scale.set(.95,.475,1);ks.position.set(3,2.25,3.5)};obst.push({x:3,z:3.5,hx:1.5,hz:.5});
  bxG=new THREE.Group();world.add(bxG);drawBoxes();
  // dekorasi
  const hd=add(label("MINI SUPERMARKET","Belanja hemat & lengkap",true));hd.scale.set(1.9,1.9,1);hd.position.set(w/2,2.5,-5.85);
@@ -507,7 +538,7 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=FALSE});drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
@@ -639,7 +670,7 @@ $("pb").addEventListener("click",e=>{
  if(a==="stok"){const c=cost(PP[i]);if(S.money<c)return;if(S.boxes.length>=10){msg("Area kardus penuh! Isi rak dulu.");return}S.money-=c;S.boxes.push({id:i,q:12});drawBoxes();SFX.buy();msg("Kardus "+PP[i].n+" tiba di dekat pintu 📦")}
  else if(a==="rak"){if(S.money<150000)return;S.money-=150000;S.shelves[S.shelves.findIndex(x=>!x)]=i;buildStore();SFX.buy();msg("Rak "+PP[i].n+" dipasang. Isi stoknya!")}
  else if(a==="pack"){const o=ORD.find(x=>x.id===+i);if(o)packOrder(o,false)}
-     else if(a==="tolak"){const o=ORD.find(x=>x.id===+i);if(o){ORD=ORD.filter(x=>x!==o);SFX.tap();msg("🚫 Pesanan #"+o.id+" ditolak.");phone()}}
+ else if(a==="tolak"){const o=ORD.find(x=>x.id===+i);if(o){ORD=ORD.filter(x=>x!==o);SFX.tap();msg("🚫 Pesanan #"+o.id+" ditolak.");phone()}}
  else if(a==="mach"){const l=+i,m=MACH[l];if(!m||S.mach!==l-1||S.money<m.c)return;S.money-=m.c;S.mach=l;buildStore();SFX.buy();msg("Upgrade: "+m.n+"!")}
  else if(a==="hire"){if(S.money<300000||S.worker)return;S.money-=300000;S.worker=true;buildStore();SFX.buy();msg("Pegawai pengemas mulai bekerja! Gaji Rp30.000/hari.")}
  else if(a==="hrg"){S.price[i]=cl(pr(i)+(+b.dataset.d),500,maxP(i));refresh(S.shelves.indexOf(i))}
