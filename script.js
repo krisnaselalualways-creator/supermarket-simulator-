@@ -668,7 +668,7 @@ const bt_=(a,i,txt,dis,d)=>'<button class="btn" data-a="'+a+'"'+(i!==undefined?'
 const HIRE=()=>S.worker?row("🧑‍🍳 Pegawai pengemas","Sudah bekerja: mengemas pesanan online otomatis • gaji Rp30.000/hari"):row("🧑‍🍳 Pegawai pengemas","Mengemas pesanan online otomatis • gaji Rp30.000/hari",bt_("hire",undefined,rp(300000),S.money<300000));
 function phone(){
  let h="";
- if(tab===0)P.forEach(p=>{const on=S.shelves.includes(p.id),c=cost(p);h+=row(p.n,"Rak "+S.stock[p.id]+"/24 • Kardus "+S.boxes.filter(b=>b.id===p.id).length+" • Grosir tetap",on?bt_("stok",p.id,"+1 kardus · "+rp(c),S.money<c):"<small>Belum ada rak</small>")});
+ if(tab===0)P.forEach(p=>{const on=S.shelves.includes(p.id),c=cost(p);h+=row(p.n,"Rak "+S.stock[p.id]+"/24 • Kardus "+S.boxes.filter(b=>b.id===p.id).length+"",on?bt_("stok",p.id,"+1 kardus · "+rp(c),S.money<c):"<small>Belum ada rak</small>")});
  else if(tab===1){const free=P.filter(p=>!S.shelves.includes(p.id)),used=S.shelves.filter(Boolean).length,full=used>=slotsN();h+=HIRE()+"<small class='note'>Rak terpakai "+used+"/"+slotsN()+"</small>";
   if(full)h+="<p class='note'>Slot penuh. Perluas lahan dulu.</p>";else if(!free.length)h+="<p class='note'>Semua produk sudah punya rak.</p>";else free.forEach(p=>h+=row("Rak "+p.n,"",bt_("rak",p.id,rp(150000),S.money<150000)))}
  else if(tab===6){h+="<small class='note'>Pesanan online: berdiri dekat meja kasir, lalu ketuk harga untuk mengemas. Barang diambil dari stok rak."+(S.worker?" Pegawai pengemas akan mengemas otomatis jika stok cukup.":"")+"</small>";if(!ORD.length)h+="<p class='note'>Belum ada pesanan. Pesanan masuk saat toko buka.</p>";
