@@ -250,7 +250,9 @@ function person(col,hair,skin,pants,hat,nb){
  const sh=new THREE.Mesh(CIRC,SHM);sh.rotation.x=-Math.PI/2;sh.position.y=.012;g.add(sh);
  /* kaki: pivot di pinggul, celana + sepatu */
  g.userData.l=[-1,1].map(s=>{const L=new THREE.Group();L.position.set(s*.105,.64,0);g.add(L);
-  pm(PGM.cyl(.085,.065,.58,9),pants,0,-.31,0,L);pm(PHEAD,shoe,0,-.6,.035,L,.075,.045,.115);return L});
+  pm(PGM.cyl(.085,.07,.32,9),pants,0,-.16,0,L);
+  const K=new THREE.Group();K.position.y=-.32;L.add(K);L.userData.k=K;
+  pm(PGM.sph(.07,8,6),pants,0,0,0,K);pm(PGM.cyl(.07,.058,.3,9),pants,0,-.15,0,K);pm(PHEAD,shoe,0,-.3,.035,K,.075,.045,.115);return L});
  /* pinggul + ikat pinggang */
  pm(PGM.cyl(.2,.2,.14,12),pants,0,.66,0,g,1,1,.68);pm(PGM.cyl(.205,.205,.035,12),"#2a2a2a",0,.74,0,g,1,1,.68);
  /* badan: bahu lebih lebar dari pinggang */
@@ -262,10 +264,11 @@ function person(col,hair,skin,pants,hat,nb){
  g.userData.a=[-1,1].map(s=>{const A=new THREE.Group();A.position.set(s*.265,1.2,0);g.add(A);
   pm(PGM.sph(.075,8,6),col,0,0,0,A);
   pm(PGM.cyl(.062,.056,.27,8),col,0,-.14,0,A);
-  pm(PGM.cyl(.05,.042,.25,8),skin,0,-.39,0,A);
-  pm(PGM.sph(.052,8,6),skin,0,-.54,0,A);return A});
+  const E=new THREE.Group();E.position.y=-.27;A.add(E);A.userData.e=E;
+  pm(PGM.cyl(.05,.042,.25,8),skin,0,-.125,0,E);
+  pm(PGM.sph(.052,8,6),skin,0,-.27,0,E);return A});
  /* kepala: agak lonjong, ada telinga, hidung, mata, alis, mulut */
- const hd=new THREE.Group();hd.position.set(0,1.44,0);g.add(hd);
+ const hd=new THREE.Group();hd.position.set(0,1.44,0);g.add(hd);g.userData.h=hd;g.userData.k=0;g.userData.ph=0;g.rotation.order="YXZ";
  pm(PHEAD,skin,0,0,0,hd,.135,.16,.145);
  pm(PGM.sph(.028,6,5),skin,-.14,-.01,0,hd);pm(PGM.sph(.028,6,5),skin,.14,-.01,0,hd);
  pm(PGM.sph(.026,6,5),skin,0,-.025,.15,hd,1,1.2,1);
@@ -279,10 +282,20 @@ function person(col,hair,skin,pants,hat,nb){
  /* topi */
  if(hat){pm(PCAP,col,0,.04,0,hd,.158,.15,.166);pm(bgeo(.2,.012,.14),col,0,.035,.17,hd)}
  /* tas belanja di tangan kanan */
- if(!nb){const T=g.userData.a[1];pm(bgeo(.22,.2,.12),"#c0504d",0,-.66,.02,T);pm(bgeo(.22,.03,.12),"#8a3a38",0,-.56,.02,T);
-  const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.55,.02);T.add(hn)}
+ if(!nb){const T=g.userData.a[1].userData.e;pm(bgeo(.22,.2,.12),"#c0504d",0,-.39,.02,T);pm(bgeo(.22,.03,.12),"#8a3a38",0,-.29,.02,T);
+  const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.28,.02);T.add(hn)}
  return g}
-function animPerson(m,mv,now,seed){const a=mv?Math.sin(now*9+seed*7):0;m.userData.l[0].rotation.x=a*.6;m.userData.l[1].rotation.x=-a*.6;m.userData.a[0].rotation.x=-a*.5;m.userData.a[1].rotation.x=a*.5;return Math.abs(a)*.05}
+function animPerson(m,mv,now,seed){
+ const u=m.userData,dt=Math.min(.1,Math.max(0,now-(u.t===undefined?now:u.t)));u.t=now;
+ u.k+=((mv?1:0)-u.k)*Math.min(1,dt*7);u.ph+=dt*8.5*u.k;const k=u.k,ph=u.ph+seed*3,a=Math.sin(ph)*k,c=Math.cos(ph);
+ const[l0,l1]=u.l,[a0,a1]=u.a;
+ l0.rotation.x=a*.62;l1.rotation.x=-a*.62;
+ l0.userData.k.rotation.x=.05+k*.75*Math.max(0,-c);l1.userData.k.rotation.x=.05+k*.75*Math.max(0,c);
+ a0.rotation.x=-a*.5;a1.rotation.x=a*.5;
+ a0.userData.e.rotation.x=-(.1+k*.5*Math.max(0,a));a1.userData.e.rotation.x=-(.1+k*.5*Math.max(0,-a));
+ u.h.rotation.y=Math.sin(ph)*.07*k;u.h.rotation.x=-.04*k+Math.sin(now*1.3+seed)*.015*(1-k);
+ m.rotation.x=.07*k;
+ return (1-Math.abs(a))*.045*k}
 
 /* ---------- dunia toko ---------- */
 let world=null,slots=[],obst=[],shG=[],bxG=null,mDr=null,dL=null,dR=null,dInd=null,signCv=null,signTx=null,wkIc=null,scrCv=null,scrTx=null,rvM=null,gh=null;
