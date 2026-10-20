@@ -64,7 +64,7 @@ addEventListener("pointerdown",()=>{ensureAC();amb()},{passive:true});
 /* ---------- event & harga grosir ---------- */
 const EVS=[{k:"ramai",n:"🔥 Jam ramai",t:40},{k:"hujan",n:"🌧️ Hujan deras",t:40},{k:"promo",n:"🏷️ Promo pemasok -30%",t:60}];
 const cost=p=>Math.round(p.p*.7*12*(ev&&ev.k==="promo"?.7:1)/100)*100;
-const mkl=id=>"🟡 normal";const mkl_old=id=>{const m=S.mk[id]||1,o=S.mkp[id]||1,ar=m>o+.001?"▲":m<o-.001?"▼":"•";return (m<.9?"🟢 murah":m>1.15?"🔴 mahal":"🟡 normal")+" "+ar};
+const mkl_old=id=>{const m=S.mk[id]||1,o=S.mkp[id]||1,ar=m>o+.001?"▲":m<o-.001?"▼":"•";return (m<.9?"🟢 murah":m>1.15?"🔴 mahal":"🟡 normal")+" "+ar};
 function rollMarket(){P.forEach(p=>{const o=S.mk[p.id]||1;S.mkp[p.id]=o;S.mk[p.id]=Math.round(cl(1+(o-1)*.6+(Math.random()-.5)*.5,.7,1.5)*20)/20})}
 
 /* ---------- renderer ---------- */
@@ -668,7 +668,7 @@ const bt_=(a,i,txt,dis,d)=>'<button class="btn" data-a="'+a+'"'+(i!==undefined?'
 const HIRE=()=>S.worker?row("🧑‍🍳 Pegawai pengemas","Sudah bekerja: mengemas pesanan online otomatis • gaji Rp30.000/hari"):row("🧑‍🍳 Pegawai pengemas","Mengemas pesanan online otomatis • gaji Rp30.000/hari",bt_("hire",undefined,rp(300000),S.money<300000));
 function phone(){
  let h="";
- if(tab===0)P.forEach(p=>{const on=S.shelves.includes(p.id),c=cost(p);h+=row(p.n,"Rak "+S.stock[p.id]+"/24 • Kardus "+S.boxes.filter(b=>b.id===p.id).length+" • Grosir "+mkl(p.id),on?bt_("stok",p.id,"+1 kardus · "+rp(c),S.money<c):"<small>Belum ada rak</small>")});
+ if(tab===0)P.forEach(p=>{const on=S.shelves.includes(p.id),c=cost(p);h+=row(p.n,"Rak "+S.stock[p.id]+"/24 • Kardus "+S.boxes.filter(b=>b.id===p.id).length+" • Grosir tetap",on?bt_("stok",p.id,"+1 kardus · "+rp(c),S.money<c):"<small>Belum ada rak</small>")});
  else if(tab===1){const free=P.filter(p=>!S.shelves.includes(p.id)),used=S.shelves.filter(Boolean).length,full=used>=slotsN();h+=HIRE()+"<small class='note'>Rak terpakai "+used+"/"+slotsN()+"</small>";
   if(full)h+="<p class='note'>Slot penuh. Perluas lahan dulu.</p>";else if(!free.length)h+="<p class='note'>Semua produk sudah punya rak.</p>";else free.forEach(p=>h+=row("Rak "+p.n,"",bt_("rak",p.id,rp(150000),S.money<150000)))}
  else if(tab===6){h+="<small class='note'>Pesanan online: berdiri dekat meja kasir, lalu ketuk harga untuk mengemas. Barang diambil dari stok rak."+(S.worker?" Pegawai pengemas akan mengemas otomatis jika stok cukup.":"")+"</small>";if(!ORD.length)h+="<p class='note'>Belum ada pesanan. Pesanan masuk saat toko buka.</p>";
@@ -699,7 +699,7 @@ $("pb").addEventListener("click",e=>{
 /* ---------- panduan & pengaturan ---------- */
 const HELP=[
 ["🎮 Gerak & lihat","Joystick kiri untuk jalan. Geser layar untuk menoleh. Titik di tengah layar adalah pembidik. Tombol ✋ di pojok kanan bawah dipakai untuk mengambil, menaruh, atau membuka apa yang kamu bidik."],
-["📱 Belanja stok","Ketuk Ponsel → Stok → beli kardus. Kardusnya muncul di dekat pintu. Harga grosir berubah tiap hari, beli saat 🟢 murah."],
+["📱 Belanja stok","Ketuk Ponsel → Stok → beli kardus. Kardusnya muncul di dekat pintu. Harga grosir selalu tetap."],
 ["📦 Isi rak","Dekati kardus → ketuk ✋ untuk mengangkat → bawa ke rak yang cocok → ✋ lagi untuk mengisi (tunggu sampai terisi, jangan menjauh). Satu rak maksimal 24 barang. Kardus kosong jadi sampah."],
 ["🧾 Mode kasir","Arahkan titik ke meja kasir lalu ketuk ✋. Kamu masuk mode kasir dan pelanggan dilayani satu per satu otomatis: ketuk barang agar loncat ke mesin (harga terhitung di layar), pelanggan memberi uang, ketik kembalian di keypad lalu OK (QRIS tanpa kembalian). Ketuk KELUAR DARI KASIR kalau sudah tidak mau melayani. Waspada: ⏱️ buru-buru, 🛒 borong, 💬 minta diskon."],
 ["🏷️ Harga & rak","Arahkan titik ke rak: ubah harga dengan − / +, atau ketuk ✋ untuk mengangkat rak (✋ lagi untuk menaruh, ↻ untuk memutar). Harga terlalu mahal membuat toko sepi."],
