@@ -25,7 +25,7 @@ const PP={};P.forEach(p=>PP[p.id]=p);
 const SPH=28,DAYL=13*SPH,SC=SPH/10,fixk=v=>Math.round(v*SC/500)*500;   // 1 jam game = 28 detik
 const maxP=id=>Math.round(PP[id].p*2/500)*500;
 const pr=id=>Math.min(S.price[id]||PP[id].p,maxP(id));
-const mc=id=>Math.round(PP[id].p*.7*(S.mk[id]||1));                     // modal per barang
+const mc=id=>Math.round(PP[id].p*.7);                    // modal per barang
 const def=()=>({money:300000,rating:3,served:0,land:0,
  stock:{mie:12,air:12,roti:8,susu:0,keripik:0,sabun:0,teh:0,kopi:0,beras:0,minyak:0},
  shelves:["mie","air","roti"],boxes:[],carry:null,price:{},pos:{},day:1,dt:0,
@@ -63,8 +63,8 @@ addEventListener("pointerdown",()=>{ensureAC();amb()},{passive:true});
 
 /* ---------- event & harga grosir ---------- */
 const EVS=[{k:"ramai",n:"🔥 Jam ramai",t:40},{k:"hujan",n:"🌧️ Hujan deras",t:40},{k:"promo",n:"🏷️ Promo pemasok -30%",t:60}];
-const cost=p=>Math.round(p.p*.7*12*(ev&&ev.k==="promo"?.7:1)*(S.mk[p.id]||1)/100)*100;
-const mkl=id=>{const m=S.mk[id]||1,o=S.mkp[id]||1,ar=m>o+.001?"▲":m<o-.001?"▼":"•";return (m<.9?"🟢 murah":m>1.15?"🔴 mahal":"🟡 normal")+" "+ar};
+const cost=p=>Math.round(p.p*.7*12*(ev&&ev.k==="promo"?.7:1)/100)*100;
+const mkl=id=>"🟡 normal";const mkl_old=id=>{const m=S.mk[id]||1,o=S.mkp[id]||1,ar=m>o+.001?"▲":m<o-.001?"▼":"•";return (m<.9?"🟢 murah":m>1.15?"🔴 mahal":"🟡 normal")+" "+ar};
 function rollMarket(){P.forEach(p=>{const o=S.mk[p.id]||1;S.mkp[p.id]=o;S.mk[p.id]=Math.round(cl(1+(o-1)*.6+(Math.random()-.5)*.5,.7,1.5)*20)/20})}
 
 /* ---------- renderer ---------- */
@@ -646,8 +646,14 @@ function endDay(){
  if(S.debt>0){const fine=Math.round(S.debt*.1/500)*500;S.debt+=fine;rate(1);rate(1);warn="⚠️ Uang kurang! Tunggakan "+rp(S.debt)+" (termasuk denda "+rp(fine)+"). Rating turun."}
  let bonus=0;if(net>=tg){bonus=Math.round(tg*.1/500)*500;S.money+=bonus}
  rollMarket();S.pn=net;
+    const m=v=>(v<0?"−":"")+rp(Math.abs(v));
+ const det='<div class="sumdet"><b>Rincian hari ini</b>'+row("Pelanggan dilayani",D.served+(D.on?" • pesanan online "+D.on:""),"")+
+  row("Pendapatan","",m(D.rev))+row("Modal barang","",m(-D.cogs))+row("<b>Untung kotor</b>","",'<b>'+m(D.rev-D.cogs)+"</b>")+
+  row("Sewa toko","",m(-rent))+row("Listrik ("+n+" rak)","",m(-pw))+(wg?row("Gaji pegawai","",m(-wg)):"")+
+  row("<b>Untung bersih</b>","",'<b class="'+(net>=0?"pos":"neg")+'">'+m(net)+"</b>")+
+  (old?row("Tunggakan kemarin","",m(-old)):"")+row("Uang dibayar","",m(-pay))+(bonus?row("Bonus target","",m(bonus)):"")+row("Uang sekarang","",rp(S.money))+"</div>";
  const h='<div class="sumbox"><div class="sumlbl">Untung bersih</div><div class="sumnum '+(net>=0?"pos":"neg")+'">'+(net<0?"−":"")+rp(Math.abs(net))+'</div>'+
-  '<div class="sumtg '+(net>=tg?"ok":"")+'">Target '+rp(tg)+': '+(net>=tg?"✅ Tercapai (bonus "+rp(bonus)+") 🎉":"❌ Belum")+'</div></div>'+(warn?'<p class="warn">'+warn+"</p>":"");
+  '<div class="sumtg '+(net>=tg?"ok":"")+'">Target '+rp(tg)+': '+(net>=tg?"✅ Tercapai (bonus "+rp(bonus)+") 🎉":"❌ Belum")+'</div></div>'+det+(warn?'<p class="warn">'+warn+"</p>":"");
  const tt="🌙 Hari ke-"+S.day+" selesai";S.sum={t:tt,h};save();showSum(tt,h);vib(net>=tg?[20,60,20]:20)}
 $("sn").addEventListener("click",()=>{
  S.day++;S.D={rev:0,cogs:0,served:0,bad:0,out:0,rc:0,rs:0,on:0};S.sum=null;dayT=0;S.dt=0;spawnT=3;ev=null;evT=40+Math.random()*40;
