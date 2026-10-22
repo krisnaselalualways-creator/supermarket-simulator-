@@ -93,7 +93,7 @@ const cam=new THREE.PerspectiveCamera(72,1,.1,60);cam.rotation.order="YXZ";sc.ad
 const hemi=new THREE.HemisphereLight("#ffffff","#8a8a8a",1.05);sc.add(hemi);
 const dl=new THREE.DirectionalLight("#fff4e0",.45);dl.position.set(5,10,5);sc.add(dl);
 const normFov=a=>a>1?cl(2*Math.atan(Math.tan(50*Math.PI/180)/a)*180/Math.PI,28,70):72;
-const cashPose=()=>cam.aspect>=1.2?{x:3.25,y:1.65,z:5.15,tx:3.1,ty:1.2,tz:3.0,fov:62}:{x:3.0,y:2.0,z:6.2,tx:3.0,ty:1.2,tz:3.2,fov:92};
+const cashPose=()=>cam.aspect>=1.2?{x:3.3,y:1.72,z:5.6,tx:3.12,ty:1.2,tz:3.0,fov:62}:{x:3.0,y:2.0,z:6.2,tx:3.0,ty:1.2,tz:3.2,fov:92};
 function applyFov(){cam.fov=CASH?cashPose().fov:normFov(cam.aspect);cam.updateProjectionMatrix()}
 function rs(){const w=innerWidth,h=innerHeight;R.setPixelRatio(PR);R.setSize(w,h,false);cam.aspect=w/h;applyFov()}
 let rzT;const rsLater=()=>{clearTimeout(rzT);rzT=setTimeout(rs,60)};
@@ -391,10 +391,10 @@ function buildStore(){
  // meja kasir: konveyor kanan, monitor besar kiri (seperti game referensi)
  box(3,.9,1,"#7c4a2d",3,.45,3.5,world);box(3.1,.08,1.1,"#b8784b",3,.94,3.5,world);
  box(1.35,.02,.8,"#33363d",3.6,.99,3.5,world);
- box(.7,.1,.5,"#2b2f3a",2.05,1.03,3.62,world);box(.12,.3,.1,"#2b2f3a",2.05,1.2,3.55,world);box(.94,.62,.06,"#1b1e27",2.05,1.5,3.6,world);
+ box(.7,.1,.5,"#2b2f3a",2.3,1.03,3.62,world);box(.12,.3,.1,"#2b2f3a",2.3,1.2,3.55,world);box(.94,.62,.06,"#1b1e27",2.3,1.5,3.6,world);
  scrCv=document.createElement("canvas");scrCv.width=512;scrCv.height=272;scrTx=new THREE.CanvasTexture(scrCv);
- add(new THREE.Mesh(new THREE.PlaneGeometry(.84,.52),new THREE.MeshBasicMaterial({map:scrTx}))).position.set(2.05,1.5,3.64);drawScr("SIAP","",null);
- mDr=box(.5,.07,.4,"#555b66",2.05,.99,3.62,world);
+ add(new THREE.Mesh(new THREE.PlaneGeometry(.84,.52),new THREE.MeshBasicMaterial({map:scrTx}))).position.set(2.3,1.5,3.64);drawScr("SIAP","",null);
+ mDr=box(.5,.07,.4,"#555b66",2.3,.99,3.62,world);
  box(.2,.04,.26,"#cfd6df",2.9,1.0,3.88,world);box(.16,.012,.1,"#3b6fb6",2.9,1.025,3.88,world);
  if(S.mach>=2){box(.3,.05,.22,"#222",4.3,1.0,3.5,world);box(.28,.012,.04,"#ff3030",4.3,1.03,3.5,world)}
  if(S.mach>=3){box(.14,.22,.1,"#444c58",3.2,1.1,3.88,world);box(.1,.07,.012,"#8ee5c1",3.2,1.17,3.82,world)}
@@ -471,7 +471,7 @@ const cst=box(.42,.05,.14,"#fff",0,-.24,-.85,carryM);cst.material=new THREE.Mesh
 const carryT=box(.28,.3,.2,"#2f3340",.35,-.38,-.8,cam);carryT.visible=false;
 const PART=[],PG=bgeo(.07,.07,.07);
 function burst(x,y,z,col,n){for(let i=0;i<n&&PART.length<40;i++){const m=new THREE.Mesh(PG,bmat(col));m.position.set(x,y,z);sc.add(m);PART.push({m,vx:(Math.random()-.5)*1.6,vy:1.4+Math.random()*1.4,vz:(Math.random()-.5)*1.6,l:.7})}}
-function partTick(dt){for(let i=MF.length-1;i>=0;i--){const f=MF[i];f.t+=dt;const p=Math.min(1,f.t/.4),k=1-.5*p;f.o.position.set(f.x+(2.05-f.x)*p,f.y+(1.12-f.y)*p+Math.sin(Math.PI*p)*.18,f.z+(3.62-f.z)*p);f.o.scale.set(k,k,k);if(p>=1){sc.remove(f.o);MF.splice(i,1)}}
+function partTick(dt){for(let i=MF.length-1;i>=0;i--){const f=MF[i];f.t+=dt;const p=Math.min(1,f.t/.4),k=1-.5*p;f.o.position.set(f.x+(2.3-f.x)*p,f.y+(1.12-f.y)*p+Math.sin(Math.PI*p)*.18,f.z+(3.62-f.z)*p);f.o.scale.set(k,k,k);if(p>=1){sc.remove(f.o);MF.splice(i,1)}}
  for(let i=PART.length-1;i>=0;i--){const p=PART[i];p.l-=dt;if(p.l<=0){sc.remove(p.m);PART.splice(i,1);continue}p.vy-=6*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;const s=p.l/.7;p.m.scale.set(s,s,s)}}
 const hKick=()=>{HK=1;vib(10)};
 
@@ -685,7 +685,7 @@ function scanTick(dt,now){
  if(!B){if(CASH){const nx=cs.find(c=>c.st==="queue"&&c.rd&&c.cm);if(nx)beginBill(nx);else{sD("scant","block");sT("scant","⏳ Menunggu pelanggan di meja kasir…")}}return}
  if(B.mm&&B.mt<1){B.mt=Math.min(1,B.mt+dt*2.5);B.mm.position.set(3+.2*B.mt,1.25-.27*B.mt+Math.sin(Math.PI*B.mt)*.2,2.4+1.1*B.mt)}
  if(!B.scan)return;const dur=S.mach>=2?.22:.38;
- B.fly=B.fly.filter(f=>{f.t+=dt;const p=Math.min(1,f.t/dur),o=f.m.userData.o;if(o)f.m.position.set(o.x+(2.05-o.x)*p,o.y+(1.3-o.y)*p+Math.sin(Math.PI*p)*.3,o.z+(3.62-o.z)*p);
+ B.fly=B.fly.filter(f=>{f.t+=dt;const p=Math.min(1,f.t/dur),o=f.m.userData.o;if(o)f.m.position.set(o.x+(2.3-o.x)*p,o.y+(1.3-o.y)*p+Math.sin(Math.PI*p)*.3,o.z+(3.62-o.z)*p);
   if(p>=1){f.m.visible=false;const pid=B.units[f.k];B.run+=pr(pid);B.done++;drawScr(PP[pid].n,rp(pr(pid)),B.run);snd(1500,.07,"square",.05);return false}return true});
  if(!B.fin){B.c.cm.forEach(m=>{if(m.visible&&!m.userData.f&&m.userData.ol){const s=1.12+.03*Math.sin(now*6);m.userData.ol.scale.set(s,s,s)}});sD("scant","block");sT("scant","👆 Ketuk barang untuk dipindai ("+B.done+"/"+B.units.length+")")}
  if(B.done>=B.units.length&&!B.fly.length&&!B.fin){B.fin=true;B.scan=false;sD("scant","none");finishScan()}}
@@ -727,7 +727,7 @@ $("ok").addEventListener("click",()=>{
  {let st=5,rk="ex";if(B.method==="qris")rk="qr";else if(d>0)rk="xs";else if(d<0){rk="sh";st=1}
   if(st>1&&c.wait>c.pat*.6){rk="sl";st=3}if(B.dsc===1)rk="d5";else if(B.dsc===-1){rk="d3";st=Math.min(st,3)}if(c.ty==="rush"&&st>=4&&c.wait<8)rk="ru";addRev(st,pick(REV[rk]))}
  if(S.mach>=4){rate(5);snd(260,.18,"sawtooth",.03)}
- S.served++;msg(t);vib(d===0?[12,40,12]:30);burst(2.05,1.3,3.6,d===0?"#ffd166":"#ff8a80",d===0?10:5);
+ S.served++;msg(t);vib(d===0?[12,40,12]:30);burst(2.3,1.3,3.6,d===0?"#ffd166":"#ff8a80",d===0?10:5);
  if(Math.random()<.3)drop(c.x,c.z);c.st="out";c.path=EXIT();c.bye=d>=0?pick(["Makasih ya!","Sampai jumpa!","Besok mampir lagi","Mantap, terima kasih"]):"Kok kurang sih…";finishBill();save()});
 
 /* ---------- pesanan online & pegawai pengemas ---------- */
