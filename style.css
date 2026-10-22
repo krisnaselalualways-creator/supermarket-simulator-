@@ -165,3 +165,14 @@ border:2px solid #0003;box-shadow:0 3px 0 #0004;transition:transform .06s;line-h
 display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--fs) - 1px)}
 .bn.cn small{font-size:calc(var(--fs) - 4px);opacity:.7}
 .bn.undo{background:#4f91b7;color:#fff;justify-self:center;width:100%;max-width:70px;padding:.9em 0;font-size:calc(var(--fs) + 5px)}
+
+/* ---------- panel bayar: tidak menutupi pelanggan & uangnya ---------- */
+#bill{background:transparent;pointer-events:none;align-items:flex-end;animation:none}
+#bill .card{pointer-events:auto;box-shadow:0 0 0 2px #0002,0 8px 30px #0006}
+#bill .card h3{display:none}
+#bill .row{padding:5px 0}
+#bill .bn{padding:.55em .2em}
+#bill .mrow{gap:5px;margin-bottom:5px}
+#bill #dn{margin:6px 0}
+@media (min-aspect-ratio:6/5){#bill{justify-content:flex-end}#bill .card{width:min(360px,42vw);max-height:96vh;border-radius:18px;margin:0 calc(var(--sar) + 8px) calc(var(--sab) + 6px) 0;padding:10px 12px}}
+@media (max-aspect-ratio:6/5){#bill .card{max-height:60vh;padding:10px 14px calc(10px + var(--sab))}}
