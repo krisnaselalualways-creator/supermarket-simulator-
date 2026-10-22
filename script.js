@@ -93,7 +93,7 @@ const cam=new THREE.PerspectiveCamera(72,1,.1,60);cam.rotation.order="YXZ";sc.ad
 const hemi=new THREE.HemisphereLight("#ffffff","#8a8a8a",1.05);sc.add(hemi);
 const dl=new THREE.DirectionalLight("#fff4e0",.45);dl.position.set(5,10,5);sc.add(dl);
 const normFov=a=>a>1?cl(2*Math.atan(Math.tan(50*Math.PI/180)/a)*180/Math.PI,28,70):72;
-const cashPose=()=>cam.aspect>=1.2?{x:2.7,y:1.5,z:4.45,tx:3.0,ty:1.12,tz:2.95,fov:58}:{x:2.9,y:1.95,z:5.55,tx:2.95,ty:.95,tz:3.45,fov:98};
+const cashPose=()=>cam.aspect>=1.2?{x:3.25,y:1.65,z:5.15,tx:3.1,ty:1.2,tz:3.0,fov:62}:{x:3.0,y:2.0,z:6.2,tx:3.0,ty:1.2,tz:3.2,fov:92};
 function applyFov(){cam.fov=CASH?cashPose().fov:normFov(cam.aspect);cam.updateProjectionMatrix()}
 function rs(){const w=innerWidth,h=innerHeight;R.setPixelRatio(PR);R.setSize(w,h,false);cam.aspect=w/h;applyFov()}
 let rzT;const rsLater=()=>{clearTimeout(rzT);rzT=setTimeout(rs,60)};
@@ -371,7 +371,7 @@ function refresh(k){const o=shG[k];if(!o)return;const n=Math.min(12,S.stock[S.sh
 
 function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
 function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,136);g.fillStyle="#8ee5c1";g.textAlign="left";g.font="bold 18px monospace";g.fillText((a||"").slice(0,16),10,24);g.textAlign="right";g.fillText(b||"",246,24);
- g.textAlign="center";g.font="bold 22px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,66);g.font="bold 40px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,112);scrTx.needsUpdate=true;
+ g.textAlign="center";g.font="bold 22px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,66);g.font="bold 34px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,112);scrTx.needsUpdate=true;
  sT("lcdv",t==null?"Rp0":rp(t));sT("lcdi",a&&b?a+"  "+b:(a||""))}
 const avgRev=()=>{const a=S.rev.slice(0,20);return a.length?a.reduce((x,r)=>x+r.s,0)/a.length:S.rating};
 function drawBoard(){if(!rvM)return;const g=rvM.material.map.userData.c.getContext("2d");g.fillStyle="#fffbe8";g.fillRect(0,0,256,160);g.strokeStyle="#8a6a4a";g.lineWidth=6;g.strokeRect(3,3,250,154);g.fillStyle="#222";g.textAlign="left";g.font="bold 18px sans-serif";g.fillText("ULASAN ★ "+avgRev().toFixed(1).replace(".",","),12,28);g.font="13px sans-serif";
@@ -391,7 +391,7 @@ function buildStore(){
  // meja kasir: konveyor kanan, monitor besar kiri (seperti game referensi)
  box(3,.9,1,"#7c4a2d",3,.45,3.5,world);box(3.1,.08,1.1,"#b8784b",3,.94,3.5,world);
  box(1.35,.02,.8,"#33363d",3.6,.99,3.5,world);
- box(.7,.1,.5,"#2b2f3a",2.05,1.03,3.62,world);box(.12,.3,.1,"#2b2f3a",2.05,1.2,3.62,world);box(.94,.62,.06,"#1b1e27",2.05,1.5,3.6,world);
+ box(.7,.1,.5,"#2b2f3a",2.05,1.03,3.62,world);box(.12,.3,.1,"#2b2f3a",2.05,1.2,3.55,world);box(.94,.62,.06,"#1b1e27",2.05,1.5,3.6,world);
  scrCv=document.createElement("canvas");scrCv.width=512;scrCv.height=272;scrTx=new THREE.CanvasTexture(scrCv);
  add(new THREE.Mesh(new THREE.PlaneGeometry(.84,.52),new THREE.MeshBasicMaterial({map:scrTx}))).position.set(2.05,1.5,3.64);drawScr("SIAP","",null);
  mDr=box(.5,.07,.4,"#555b66",2.05,.99,3.62,world);
@@ -690,7 +690,7 @@ function scanTick(dt,now){
  if(!B.fin){B.c.cm.forEach(m=>{if(m.visible&&!m.userData.f&&m.userData.ol){const s=1.12+.03*Math.sin(now*6);m.userData.ol.scale.set(s,s,s)}});sD("scant","block");sT("scant","👆 Ketuk barang untuk dipindai ("+B.done+"/"+B.units.length+")")}
  if(B.done>=B.units.length&&!B.fly.length&&!B.fin){B.fin=true;B.scan=false;sD("scant","none");finishScan()}}
 function finishScan(){
- drawScr("TOTAL","",B.tot);
+ drawScr("","",B.tot);
  holdPay(B.c);
  SFX.pop();$("bill").hidden=false;
  if(B.hag){$("hag").hidden=false;sT("hgt","💬 Pelanggan minta diskon "+rp(B.hag)+". Kasih?")}else showPay()}
