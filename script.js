@@ -476,7 +476,20 @@ const cst=box(.42,.05,.14,"#fff",0,-.24,-.85,carryM);cst.material=new THREE.Mesh
 const carryT=box(.28,.3,.2,"#2f3340",.35,-.38,-.8,cam);carryT.visible=false;
 const PART=[],PG=bgeo(.07,.07,.07);
 function burst(x,y,z,col,n){for(let i=0;i<n&&PART.length<40;i++){const m=new THREE.Mesh(PG,bmat(col));m.position.set(x,y,z);sc.add(m);PART.push({m,vx:(Math.random()-.5)*1.6,vy:1.4+Math.random()*1.4,vz:(Math.random()-.5)*1.6,l:.7})}}
-function partTick(dt){for(let i=MF.length-1;i>=0;i--){const f=MF[i];f.t+=dt;const p=Math.min(1,f.t/.4),k=1-.5*p;f.o.position.set(f.x+(2.3-f.x)*p,f.y+(1.12-f.y)*p+Math.sin(Math.PI*p)*.18,f.z+(3.62-f.z)*p);f.o.scale.set(k,k,k);if(p>=1){sc.remove(f.o);MF.splice(i,1)}}
+const DRP=[],PF=[],COINM={500:new THREE.MeshBasicMaterial({color:"#dfe3e8"}),1000:new THREE.MeshBasicMaterial({color:"#f2c14e"})},COING=new THREE.CylinderGeometry(.034,.034,.008,18),_hv=new THREE.Vector3();
+function dropMoney(v){if(!B)return;const pile=B.pile=B.pile||[],i=pile.length,coin=v<2000;
+ const o=coin?new THREE.Mesh(COING,COINM[v]):new THREE.Mesh(BILLG,moneyMat(v));
+ if(!coin){o.rotation.x=-Math.PI/2;o.rotation.z=(Math.random()-.5)*.5}o.scale.setScalar(2);
+ const col=i%4,row=Math.floor(i/4)%3,lay=Math.floor(i/12),x=2.65+col*.28+(Math.random()-.5)*.03,z=3.95-row*.17+(Math.random()-.5)*.03,y=.99+lay*.008+(coin?.005:0);
+ o.position.set(x,y+1.4,z);o.userData.v=v;sc.add(o);pile.push(o);DRP.push({o,y1:y,t:0})}
+function popMoney(){if(!B||!B.pile||!B.pile.length)return;const o=B.pile.pop();sc.remove(o);const k=DRP.findIndex(f=>f.o===o);if(k>=0)DRP.splice(k,1)}
+function clearPile(){if(B&&B.pile){B.pile.forEach(o=>sc.remove(o));B.pile=null}DRP.length=0}
+function takeChange(c){const pile=B&&B.pile;if(!pile||!pile.length)return false;const E=c.m.userData.a[1].userData.e;c.m.userData.py=1;setTimeout(()=>{if(c.m)c.m.userData.py=0},800);
+ pile.forEach((o,i)=>{const k=DRP.findIndex(f=>f.o===o);if(k>=0)DRP.splice(k,1);PF.push({o,E,x:o.position.x,y:o.position.y,z:o.position.z,t:-.12-i*.05})});B.pile=null;return true}
+function partTick(dt){
+ for(let i=DRP.length-1;i>=0;i--){const f=DRP[i];f.t+=dt;const p=Math.min(1,f.t/.32);f.o.position.y=f.y1+1.4*(1-p*p);if(p>=1){f.o.position.y=f.y1;DRP.splice(i,1);snd(900,.03,"square",.03)}}
+ for(let i=PF.length-1;i>=0;i--){const f=PF[i];f.t+=dt;if(f.t<0)continue;const p=Math.min(1,f.t/.45);f.E.getWorldPosition(_hv);const k=1-.6*p;f.o.position.set(f.x+(_hv.x-f.x)*p,f.y+(_hv.y-.12-f.y)*p+Math.sin(Math.PI*p)*.15,f.z+(_hv.z+.1-f.z)*p);f.o.scale.setScalar(k*2);if(p>=1){sc.remove(f.o);PF.splice(i,1)}}
+for(let i=MF.length-1;i>=0;i--){const f=MF[i];f.t+=dt;const p=Math.min(1,f.t/.4),k=1-.5*p;f.o.position.set(f.x+(2.3-f.x)*p,f.y+(1.12-f.y)*p+Math.sin(Math.PI*p)*.18,f.z+(3.62-f.z)*p);f.o.scale.set(k,k,k);if(p>=1){sc.remove(f.o);MF.splice(i,1)}}
  for(let i=PART.length-1;i>=0;i--){const p=PART[i];p.l-=dt;if(p.l<=0){sc.remove(p.m);PART.splice(i,1);continue}p.vy-=6*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;const s=p.l/.7;p.m.scale.set(s,s,s)}}
 const hKick=()=>{HK=1;vib(10)};
 
@@ -676,7 +689,7 @@ function beginBill(c){
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
  c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});SL=[];SCH=null;drawScr("Siap dipindai","",0)}
-function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);dropPay(c);c.st="queue";
+function cancelBill(){if(!B)return;clearPile();const c=B.c;if(B.mm)sc.remove(B.mm);dropPay(c);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  SL=[];SCH=null;B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
 function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}SL=[];SCH=null;B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
@@ -716,14 +729,14 @@ $("hn").addEventListener("click",()=>{if(!B||!B.hag)return;B.hag=0;B.dsc=-1;rate
 /* tombol uang rupiah: ketuk pecahan untuk menambah kembalian */
 const BILLS=[[2000,"#c9ccd1"],[5000,"#d8b48a"],[10000,"#b9a3e3"],[20000,"#9ad8a6"],[50000,"#8cc4ee"],[100000,"#f09aa6"]];
 const COINS=[[500,"#dfe3e8"],[1000,"#f2c14e"]];
-function addGive(v){if(!B||B.give+v>9999999)return;B.give+=v;(B.stk=B.stk||[]).push(v);sT("bg",rp(B.give));vib(6)}
-function undoGive(){if(!B||!B.stk||!B.stk.length)return;B.give-=B.stk.pop();sT("bg",rp(B.give));vib(6)}
+function addGive(v){if(!B||B.give+v>9999999)return;B.give+=v;(B.stk=B.stk||[]).push(v);dropMoney(v);sT("bg",rp(B.give));vib(6)}
+function undoGive(){if(!B||!B.stk||!B.stk.length)return;B.give-=B.stk.pop();popMoney();sT("bg",rp(B.give));vib(6)}
 function moneyBtn(v,c,coin){const b=document.createElement("button");b.className="bn"+(coin?" cn":"");b.style.background=c;
  b.innerHTML=coin?"<small>Rp</small>"+v.toLocaleString("id-ID"):"Rp"+v.toLocaleString("id-ID");
  b.addEventListener("click",()=>addGive(v));$(coin?"dcoin":"dbill").appendChild(b)}
 BILLS.forEach(d=>moneyBtn(d[0],d[1],false));COINS.forEach(d=>moneyBtn(d[0],d[1],true));
 {const u=document.createElement("button");u.className="bn undo";u.textContent="↶";u.setAttribute("aria-label","Urungkan");u.addEventListener("click",undoGive);$("dcoin").appendChild(u)}
-$("rs").addEventListener("click",()=>{if(B){B.give=0;B.stk=[];sT("bg",rp(0))}});
+$("rs").addEventListener("click",()=>{if(B){B.give=0;B.stk=[];clearPile();sT("bg",rp(0))}});
 $("exitk").addEventListener("click",leaveCash);$("bc").addEventListener("click",leaveCash);
 $("ok").addEventListener("click",()=>{
  if(!B||!B.fin)return;if(B.method==="qris"){B.paid=B.tot;B.give=0}
@@ -737,7 +750,7 @@ $("ok").addEventListener("click",()=>{
   if(st>1&&c.wait>c.pat*.6){rk="sl";st=3}if(B.dsc===1)rk="d5";else if(B.dsc===-1){rk="d3";st=Math.min(st,3)}if(c.ty==="rush"&&st>=4&&c.wait<8)rk="ru";addRev(st,pick(REV[rk]))}
  if(S.mach>=4){rate(5);snd(260,.18,"sawtooth",.03)}
  S.served++;msg(t);vib(d===0?[12,40,12]:30);burst(2.3,1.3,3.6,d===0?"#ffd166":"#ff8a80",d===0?10:5);
- if(Math.random()<.3)drop(c.x,c.z);c.st="out";c.path=EXIT();c.bye=d>=0?pick(["Makasih ya!","Sampai jumpa!","Besok mampir lagi","Mantap, terima kasih"]):"Kok kurang sih…";finishBill();save()});
+ if(Math.random()<.3)drop(c.x,c.z);const bye=d>=0?pick(["Makasih ya!","Sampai jumpa!","Besok mampir lagi","Mantap, terima kasih"]):"Kok kurang sih…",go=()=>{if(cs.includes(c)){c.st="out";c.path=EXIT();c.bye=bye}};if(takeChange(c))setTimeout(go,900);else go();finishBill();save()});
 
 /* ---------- pesanan online & pegawai pengemas ---------- */
 function packOrder(o,auto){
