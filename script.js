@@ -93,7 +93,7 @@ const cam=new THREE.PerspectiveCamera(72,1,.1,60);cam.rotation.order="YXZ";sc.ad
 const hemi=new THREE.HemisphereLight("#ffffff","#8a8a8a",1.05);sc.add(hemi);
 const dl=new THREE.DirectionalLight("#fff4e0",.45);dl.position.set(5,10,5);sc.add(dl);
 const normFov=a=>a>1?cl(2*Math.atan(Math.tan(50*Math.PI/180)/a)*180/Math.PI,28,70):72;
-const cashPose=()=>cam.aspect>=1.2?{x:2.85,y:1.75,z:4.85,tx:2.95,ty:1.0,tz:3.4,fov:62}:{x:2.9,y:1.95,z:5.55,tx:2.95,ty:.95,tz:3.45,fov:98};
+const cashPose=()=>cam.aspect>=1.2?{x:2.7,y:1.5,z:4.45,tx:3.0,ty:1.12,tz:2.95,fov:58}:{x:2.9,y:1.95,z:5.55,tx:2.95,ty:.95,tz:3.45,fov:98};
 function applyFov(){cam.fov=CASH?cashPose().fov:normFov(cam.aspect);cam.updateProjectionMatrix()}
 function rs(){const w=innerWidth,h=innerHeight;R.setPixelRatio(PR);R.setSize(w,h,false);cam.aspect=w/h;applyFov()}
 let rzT;const rsLater=()=>{clearTimeout(rzT);rzT=setTimeout(rs,60)};
@@ -339,8 +339,8 @@ function person(col,hair,skin,pants,hat,nb,kind){
   pm(bgeo(.36,.4,.2),col,0,1.0,-.2,g);pm(bgeo(.37,.05,.21),"#f3f3f3",0,1.14,-.2,g);pm(bgeo(.2,.1,.01),"#1d6b3d",0,.98,-.305,g);
   [-1,1].forEach(s=>pm(bgeo(.04,.34,.02),"#1d6b3d",s*.1,1.04,-.07,g))}
  /* tas belanja di tangan kanan */
- if(!nb){const T=g.userData.a[1].userData.e;pm(bgeo(.22,.2,.12),"#c0504d",0,-.39,.02,T);pm(bgeo(.22,.03,.12),"#8a3a38",0,-.29,.02,T);
-  const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.28,.02);T.add(hn)}
+ if(!nb){const T=g.userData.a[1].userData.e,bg1=pm(bgeo(.22,.2,.12),"#c0504d",0,-.39,.02,T),bg2=pm(bgeo(.22,.03,.12),"#8a3a38",0,-.29,.02,T);g.userData.bag=[bg1,bg2];
+  const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.28,.02);T.add(hn);g.userData.bag.push(hn)}
  return g}
 function animPerson(m,mv,now,seed){
  const u=m.userData,dt=Math.min(.1,Math.max(0,now-(u.t===undefined?now:u.t)));u.t=now;
@@ -353,6 +353,8 @@ function animPerson(m,mv,now,seed){
  u.h.rotation.y=Math.sin(ph)*.07*k;u.h.rotation.x=-.04*k+Math.sin(now*1.3+seed)*.015*(1-k);
  const rr=u.rr=(u.rr||0)+((u.rc||0)-(u.rr||0))*Math.min(1,dt*9);
  if(rr>.01){a0.rotation.x=a0.rotation.x*(1-rr)-1.4*rr;a0.userData.e.rotation.x=a0.userData.e.rotation.x*(1-rr)-.3*rr;u.h.rotation.x+=.12*rr}
+ const py=u.pyr=(u.pyr||0)+((u.py||0)-(u.pyr||0))*Math.min(1,dt*6);
+ if(py>.01){a1.rotation.x=a1.rotation.x*(1-py)-1.2*py;a1.userData.e.rotation.x=a1.userData.e.rotation.x*(1-py)-.5*py;u.h.rotation.x+=.05*py}
  m.rotation.x=.07*k+.1*rr;
  return (1-Math.abs(a))*.045*k}
 
@@ -469,7 +471,8 @@ const cst=box(.42,.05,.14,"#fff",0,-.24,-.85,carryM);cst.material=new THREE.Mesh
 const carryT=box(.28,.3,.2,"#2f3340",.35,-.38,-.8,cam);carryT.visible=false;
 const PART=[],PG=bgeo(.07,.07,.07);
 function burst(x,y,z,col,n){for(let i=0;i<n&&PART.length<40;i++){const m=new THREE.Mesh(PG,bmat(col));m.position.set(x,y,z);sc.add(m);PART.push({m,vx:(Math.random()-.5)*1.6,vy:1.4+Math.random()*1.4,vz:(Math.random()-.5)*1.6,l:.7})}}
-function partTick(dt){for(let i=PART.length-1;i>=0;i--){const p=PART[i];p.l-=dt;if(p.l<=0){sc.remove(p.m);PART.splice(i,1);continue}p.vy-=6*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;const s=p.l/.7;p.m.scale.set(s,s,s)}}
+function partTick(dt){for(let i=MF.length-1;i>=0;i--){const f=MF[i];f.t+=dt;const p=Math.min(1,f.t/.4),k=1-.5*p;f.o.position.set(f.x+(2.05-f.x)*p,f.y+(1.12-f.y)*p+Math.sin(Math.PI*p)*.18,f.z+(3.62-f.z)*p);f.o.scale.set(k,k,k);if(p>=1){sc.remove(f.o);MF.splice(i,1)}}
+ for(let i=PART.length-1;i>=0;i--){const p=PART[i];p.l-=dt;if(p.l<=0){sc.remove(p.m);PART.splice(i,1);continue}p.vy-=6*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;const s=p.l/.7;p.m.scale.set(s,s,s)}}
 const hKick=()=>{HK=1;vib(10)};
 
 /* ---------- ghost rak (saat memindah) ---------- */
@@ -555,6 +558,26 @@ function handTarget(){
  return null}
 $("hand").addEventListener("click",()=>{const h=handTarget();if(h&&!h.dis)h.f()});
       /* ---------- pelanggan ---------- */
+/* ---------- uang di tangan pelanggan (kipas) & HP untuk QRIS ---------- */
+const MONC={2000:"#c9ccd1",5000:"#d8b48a",10000:"#b9a3e3",20000:"#9ad8a6",50000:"#8cc4ee",100000:"#f09aa6"},MTX={},DEN=[100000,50000,20000,10000,5000,2000],BILLG=new THREE.PlaneGeometry(.15,.07),MF=[];
+function moneyMat(v){return MTX[v]||(MTX[v]=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,map:canvasTex(192,90,(g,w,h)=>{
+ g.fillStyle=MONC[v]||"#ccc";g.fillRect(0,0,w,h);g.strokeStyle="rgba(0,0,0,.35)";g.lineWidth=4;g.strokeRect(6,6,w-12,h-12);
+ g.strokeStyle="rgba(255,255,255,.55)";g.lineWidth=2;for(let k=0;k<5;k++){g.beginPath();for(let x=12;x<w-12;x+=4){const y=14+k*13+Math.sin(x/9+k)*3;x===12?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
+ g.fillStyle="rgba(0,0,0,.25)";g.beginPath();g.ellipse(34,h/2,20,24,0,0,7);g.fill();g.fillStyle="rgba(255,255,255,.5)";g.beginPath();g.arc(34,h/2-6,9,0,7);g.fill();g.fillRect(24,h/2+4,20,16);
+ g.fillStyle="#1e1e1e";g.textAlign="center";g.font="bold 40px sans-serif";g.fillText(String(v/1000),w*.68,h*.52);g.font="bold 13px sans-serif";g.fillText("RIBU RUPIAH",w*.68,h*.74)})}))}
+function splitPaid(n){const tot=n,go=i0=>{let m=n,i=i0;const o=[];for(;i<DEN.length&&m>0;i++)while(m>=DEN[i]&&o.length<5){o.push(DEN[i]);m-=DEN[i]}return m===0?o:null};
+ n=tot;let r=null;if(n>=20000&&Math.random()<.4){const i=DEN.findIndex(d=>d<=n/2);if(i>=0)r=go(i)}return r||go(0)||[tot]}
+function makeFan(arr){const g=new THREE.Group(),n=arr.length;arr.forEach((v,i)=>{const pv=new THREE.Group();pv.rotation.z=(i-(n-1)/2)*.2;pv.position.z=.004*i;const b=new THREE.Mesh(BILLG,moneyMat(v));b.position.y=-.075;b.rotation.x=Math.PI;b.position.y=-.075;pv.add(b);g.add(pv)});return g}
+function makePhone(){const g=new THREE.Group(),pv=new THREE.Group();pv.position.y=-.06;pv.rotation.x=.35;g.add(pv);
+ pv.add(new THREE.Mesh(bgeo(.07,.13,.01),mat("#1d2330")));
+ const qr=new THREE.Mesh(new THREE.PlaneGeometry(.06,.11),new THREE.MeshBasicMaterial({map:canvasTex(64,112,g2=>{g2.fillStyle="#fff";g2.fillRect(0,0,64,112);g2.fillStyle="#1f8a4c";g2.fillRect(0,0,64,10);g2.fillStyle="#111";
+  for(let y=0;y<9;y++)for(let x=0;x<9;x++)if((x*7+y*13+x*y)%3===0)g2.fillRect(8+x*5.3,24+y*5.3,5,5);[[8,24],[43,24],[8,59]].forEach(([x,y])=>{g2.fillStyle="#111";g2.fillRect(x,y,13,13);g2.fillStyle="#fff";g2.fillRect(x+3,y+3,7,7);g2.fillStyle="#111";g2.fillRect(x+5,y+5,3,3)});g2.fillStyle="#1f8a4c";g2.font="bold 11px sans-serif";g2.textAlign="center";g2.fillText("QRIS",32,100)})}));
+ qr.position.z=.0065;pv.add(qr);return g}
+function holdPay(c){dropPay(c);const E=c.m.userData.a[1].userData.e,o=c.qris?makePhone():makeFan(splitPaid(B.paid));o.position.set(0,-.32,0);o.scale.setScalar(c.qris?1.6:2.4);o.rotation.x=c.qris?-.9:-1.45;E.add(o);c.hold=o;c.m.userData.py=1;(c.m.userData.bag||[]).forEach(m=>m.visible=false);if(c.qris)SFX.scan()}
+function dropPay(c){if(!c||!c.m)return;if(c.hold){if(c.hold.parent)c.hold.parent.remove(c.hold);c.hold=null}c.m.userData.py=0;(c.m.userData.bag||[]).forEach(m=>m.visible=true)}
+function flyHold(c){const o=c.hold;if(!o)return;if(c.qris){dropPay(c);return}
+ const wp=new THREE.Vector3(),wq=new THREE.Quaternion();o.updateWorldMatrix(true,false);o.getWorldPosition(wp);o.getWorldQuaternion(wq);
+ o.parent.remove(o);o.position.copy(wp);o.quaternion.copy(wq);sc.add(o);MF.push({o,x:wp.x,y:wp.y,z:wp.z,t:0});c.hold=null;dropPay(c)}
 /* ---------- bubble obrolan, troli, tingkah pelanggan ---------- */
 function bubble(t){const tx=canvasTex(256,96,g=>{const r=20,x0=4,y0=4,x1=252,y1=70;g.fillStyle="#fffffff2";g.strokeStyle="#3a3a3a";g.lineWidth=5;g.lineJoin="round";
   g.beginPath();g.moveTo(x0+r,y0);g.lineTo(x1-r,y0);g.quadraticCurveTo(x1,y0,x1,y0+r);g.lineTo(x1,y1-r);g.quadraticCurveTo(x1,y1,x1-r,y1);g.lineTo(138,y1);g.lineTo(128,92);g.lineTo(118,y1);g.lineTo(x0+r,y1);g.quadraticCurveTo(x0,y1,x0,y1-r);g.lineTo(x0,y0+r);g.quadraticCurveTo(x0,y0,x0+r,y0);g.closePath();g.fill();g.stroke();
@@ -606,7 +629,7 @@ function walk(c,tx,tz,dt){
  while(p.length>1&&Math.hypot(p[0][0]-c.x,p[0][1]-c.z)<.12)p.shift();
  if(p.length>1){mvTo(c,p[0][0],p[0][1],dt);return false}
  return mvTo(c,tx,tz,dt)} //rubah
-function out(c,s,why){if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){say(c,why==="an"?"Lama banget, pergi ah!":"Yah, kosong…",true);S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
+function out(c,s,why){dropPay(c);if(c.cm){c.cm.forEach(m=>sc.remove(m));c.cm=null}rate(s);c.st="out";c.rd=false;c.path=EXIT();if(s<=1){say(c,why==="an"?"Lama banget, pergi ah!":"Yah, kosong…",true);S.D.out++;addRev(1,pick(REV[why==="an"?"an":"st"]));msg("Pelanggan kesal dan pergi! Rating turun.")}}
 function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.push(i.pid)});
  const od=u.map((_,k)=>k).sort((a,b)=>GH[u[b]]-GH[u[a]]);
  c.cm=u.map((id,k)=>{const s=od.indexOf(k),m=new THREE.Mesh(GE[id],IM[id]),x=3.05+(s%4)*.32,y=.98+GH[id]/2,z=3.22+Math.floor(s/4)*.26;m.position.set(x,y,z);m.userData.o={x,y,z};m.userData.f=0;
@@ -625,6 +648,7 @@ function updC(dt,now){
       const ra=pr(w.pid)/PP[w.pid].p;if(ra<=.95&&Math.random()<.7)say(c,"Murah banget!");else if(ra>=1.4&&Math.random()<.6)say(c,"Agak mahal ya…");else if(Math.random()<.25)say(c,pick(c.kid?["Mau ini, Ma!","Yeay!"]:["Ini dia!","Oke, ambil","Kelihatannya enak"]))}
      else say(c,"Yah, habis…",true);c.i++;c.t=0}}}}}
   else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(walk(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat*.55&&!c.said2){c.said2=1;say(c,"Lama ya…")}if(c.wait>c.pat)out(c,1,"an")}
+  else if(c.st==="pay"){mvTo(c,3,2.62,dt);if(!c.mv)c.m.rotation.y*=.8}
   else if(c.st==="out"){if(c.bye){say(c,c.bye,true);c.bye=null}const p=c.path[0];if(p&&walk(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
@@ -647,10 +671,10 @@ function beginBill(c){
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
  c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});drawScr("Siap dipindai","",0)}
-function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);c.st="queue";
+function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);dropPay(c);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
  B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
-function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
+function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
 const RC=new THREE.Raycaster(),NDC=new THREE.Vector2();
 function tapItem(e){
  if(!B||!B.scan||!B.c.cm)return;NDC.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);RC.setFromCamera(NDC,cam);
@@ -667,7 +691,7 @@ function scanTick(dt,now){
  if(B.done>=B.units.length&&!B.fly.length&&!B.fin){B.fin=true;B.scan=false;sD("scant","none");finishScan()}}
 function finishScan(){
  drawScr("TOTAL","",B.tot);
- if(B.method==="cash"){const mm=new THREE.Mesh(bgeo(.28,.015,.14),mat("#4caf50"));mm.position.set(3,1.25,2.4);sc.add(mm);B.mm=mm;B.mt=0}
+ holdPay(B.c);
  SFX.pop();$("bill").hidden=false;
  if(B.hag){$("hag").hidden=false;sT("hgt","💬 Pelanggan minta diskon "+rp(B.hag)+". Kasih?")}else showPay()}
 function showPay(){
