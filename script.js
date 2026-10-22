@@ -370,12 +370,13 @@ function drawTag(k){const o=shG[k];if(!o)return;const id=S.shelves[k],t=o.tag.us
 function refresh(k){const o=shG[k];if(!o)return;const n=Math.min(12,S.stock[S.shelves[k]]);for(let i=0;i<12;i++)o.items[i].visible=i<n;drawTag(k)}
 
 function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
-let SL=[];
+let SL=[],SCH=null;
 function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,160);g.fillStyle="#8ee5c1";g.font="bold 14px monospace";
- if(!SL.length){g.textAlign="center";g.fillText(a||"",128,52)}
+ if(SCH){[["Total",SCH.t],["Uang tunai",SCH.p]].forEach((l,n)=>{const y=30+n*22;g.textAlign="left";g.fillText(l[0],10,y);g.textAlign="right";g.fillText(rp(l[1]),246,y)})}
+ else if(!SL.length){g.textAlign="center";g.fillText(a||"",128,52)}
  else{const v=SL.slice(-4);v.forEach((l,n)=>{const y=22+n*19;g.textAlign="left";g.fillText(l[0].slice(0,13),10,y);g.textAlign="right";g.fillText(l[1],246,y)})}
  g.fillStyle="#2f6f5a";g.fillRect(10,84,236,2);
- g.textAlign="center";g.font="bold 16px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,104);g.font="bold 34px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,144);scrTx.needsUpdate=true;
+ g.textAlign="center";g.font="bold 16px monospace";g.fillStyle="#5fbf9b";g.fillText(SCH?"KEMBALIAN":"TOTAL",128,104);g.font="bold 34px monospace";g.fillStyle=SCH?"#ffe08a":"#d8fff0";g.fillText(t==null?"":rp(t),128,144);scrTx.needsUpdate=true;
  sT("lcdv",t==null?"Rp0":rp(t));sT("lcdi",a&&b?a+"  "+b:(a||""))}
 const avgRev=()=>{const a=S.rev.slice(0,20);return a.length?a.reduce((x,r)=>x+r.s,0)/a.length:S.rating};
 function drawBoard(){if(!rvM)return;const g=rvM.material.map.userData.c.getContext("2d");g.fillStyle="#fffbe8";g.fillRect(0,0,256,160);g.strokeStyle="#8a6a4a";g.lineWidth=6;g.strokeRect(3,3,250,154);g.fillStyle="#222";g.textAlign="left";g.font="bold 18px sans-serif";g.fillText("ULASAN ★ "+avgRev().toFixed(1).replace(".",","),12,28);g.font="13px sans-serif";
@@ -674,11 +675,11 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});SL=[];drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});SL=[];SCH=null;drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);dropPay(c);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
- SL=[];B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
-function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}SL=[];B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
+ SL=[];SCH=null;B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
+function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}SL=[];SCH=null;B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
 const RC=new THREE.Raycaster(),NDC=new THREE.Vector2();
 function tapItem(e){
  if(B&&B.ask&&!B.took){const o=B.c.hold;if(!o)return;const v=new THREE.Vector3();o.updateWorldMatrix(true,false);o.getWorldPosition(v);v.project(cam);const sx=(v.x+1)/2*innerWidth,sy=(1-v.y)/2*innerHeight;if(Math.hypot(e.clientX-sx,e.clientY-sy)<Math.max(110,innerHeight*.17))takePay();return}
@@ -701,7 +702,7 @@ function finishScan(){
  SFX.pop();$("bill").hidden=false;
  if(B.hag){$("hag").hidden=false;sT("hgt","💬 Pelanggan minta diskon "+rp(B.hag)+". Kasih?")}else askTake()}
 function askTake(){B.ask=true;B.took=false;$("hag").hidden=true;$("pay").hidden=true}
-function takePay(){if(!B||!B.ask||B.took)return;B.took=true;sD("scant","none");const c=B.c;if(B.method==="qris")SFX.scan();else{SFX.cash();flyHold(c)}vib(10);showPay()}
+function takePay(){if(!B||!B.ask||B.took)return;B.took=true;sD("scant","none");const c=B.c;if(B.method==="qris")SFX.scan();else{SFX.cash();flyHold(c);SCH={t:B.tot,p:B.paid};drawScr("","",B.paid-B.tot)}vib(10);showPay()}
 function showPay(){
  $("hag").hidden=true;$("pay").hidden=false;const q=B.method==="qris";
  document.querySelectorAll(".cashonly").forEach(e=>e.style.display=q?"none":"");
