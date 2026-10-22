@@ -370,8 +370,12 @@ function drawTag(k){const o=shG[k];if(!o)return;const id=S.shelves[k],t=o.tag.us
 function refresh(k){const o=shG[k];if(!o)return;const n=Math.min(12,S.stock[S.shelves[k]]);for(let i=0;i<12;i++)o.items[i].visible=i<n;drawTag(k)}
 
 function drawSign(){if(!signCv)return;const g=signCv.getContext("2d"),o=S.op;g.fillStyle=o?"#1f7a4d":"#a83232";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=6;g.strokeRect(5,5,246,118);g.fillStyle="#fff";g.textAlign="center";g.font="bold 64px sans-serif";g.fillText(o?"BUKA":"TUTUP",128,72);signTx.needsUpdate=true;if(dInd)dInd.material.color.set(o?"#6fe39a":"#ff6b6b")}
-function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,136);g.fillStyle="#8ee5c1";g.textAlign="left";g.font="bold 18px monospace";g.fillText((a||"").slice(0,16),10,24);g.textAlign="right";g.fillText(b||"",246,24);
- g.textAlign="center";g.font="bold 22px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,66);g.font="bold 34px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,112);scrTx.needsUpdate=true;
+let SL=[];
+function drawScr(a,b,t){if(!scrCv)return;const g=scrCv.getContext("2d"),k=scrCv.width/256;g.setTransform(k,0,0,k,0,0);g.fillStyle="#000";g.fillRect(0,0,256,160);g.fillStyle="#8ee5c1";g.font="bold 14px monospace";
+ if(!SL.length){g.textAlign="center";g.fillText(a||"",128,52)}
+ else{const v=SL.slice(-4);v.forEach((l,n)=>{const y=22+n*19;g.textAlign="left";g.fillText(l[0].slice(0,13),10,y);g.textAlign="right";g.fillText(l[1],246,y)})}
+ g.fillStyle="#2f6f5a";g.fillRect(10,84,236,2);
+ g.textAlign="center";g.font="bold 16px monospace";g.fillStyle="#5fbf9b";g.fillText("TOTAL",128,104);g.font="bold 34px monospace";g.fillStyle="#d8fff0";g.fillText(t==null?"":rp(t),128,144);scrTx.needsUpdate=true;
  sT("lcdv",t==null?"Rp0":rp(t));sT("lcdi",a&&b?a+"  "+b:(a||""))}
 const avgRev=()=>{const a=S.rev.slice(0,20);return a.length?a.reduce((x,r)=>x+r.s,0)/a.length:S.rating};
 function drawBoard(){if(!rvM)return;const g=rvM.material.map.userData.c.getContext("2d");g.fillStyle="#fffbe8";g.fillRect(0,0,256,160);g.strokeStyle="#8a6a4a";g.lineWidth=6;g.strokeRect(3,3,250,154);g.fillStyle="#222";g.textAlign="left";g.font="bold 18px sans-serif";g.fillText("ULASAN ★ "+avgRev().toFixed(1).replace(".",","),12,28);g.font="13px sans-serif";
@@ -392,7 +396,7 @@ function buildStore(){
  box(3,.9,1,"#7c4a2d",3,.45,3.5,world);box(3.1,.08,1.1,"#b8784b",3,.94,3.5,world);
  box(1.35,.02,.8,"#33363d",3.6,.99,3.5,world);
  box(.7,.1,.5,"#2b2f3a",2.3,1.03,3.62,world);box(.12,.3,.1,"#2b2f3a",2.3,1.2,3.55,world);box(.94,.62,.06,"#1b1e27",2.3,1.5,3.6,world);
- scrCv=document.createElement("canvas");scrCv.width=512;scrCv.height=272;scrTx=new THREE.CanvasTexture(scrCv);
+ scrCv=document.createElement("canvas");scrCv.width=512;scrCv.height=320;scrTx=new THREE.CanvasTexture(scrCv);
  add(new THREE.Mesh(new THREE.PlaneGeometry(.84,.52),new THREE.MeshBasicMaterial({map:scrTx}))).position.set(2.3,1.5,3.64);drawScr("SIAP","",null);
  mDr=box(.5,.07,.4,"#555b66",2.3,.99,3.62,world);
  box(.2,.04,.26,"#cfd6df",2.9,1.0,3.88,world);box(.16,.012,.1,"#3b6fb6",2.9,1.025,3.88,world);
@@ -670,13 +674,14 @@ function beginBill(c){
  const nt=[5000,10000,20000,50000,100000].filter(n=>n>=tot);let paid=nt[0]||Math.ceil(tot/100000)*100000;if(nt[1]&&Math.random()<.45)paid=nt[1];
  B={c,tot,paid,give:0,units,method:c.qris?"qris":"cash",hag:c.ty==="tawar"?Math.max(500,Math.round(tot*.1/500)*500):0,scan:true,done:0,fly:[],fin:false,run:0,dsc:0};
  $("hag").hidden=true;$("pay").hidden=true;$("bill").hidden=true;
- c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});drawScr("Siap dipindai","",0)}
+ c.cm.forEach(m=>{m.userData.f=0;if(m.userData.ol)m.userData.ol.visible=false});SL=[];drawScr("Siap dipindai","",0)}
 function cancelBill(){if(!B)return;const c=B.c;if(B.mm)sc.remove(B.mm);dropPay(c);c.st="queue";
  if(c.cm)c.cm.forEach(m=>{m.visible=true;m.userData.f=0;const o=m.userData.o;if(o)m.position.set(o.x,o.y,o.z);if(m.userData.ol)m.userData.ol.visible=false});
- B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
-function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
+ SL=[];B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
+function finishBill(){if(B&&B.mm)sc.remove(B.mm);if(B)flyHold(B.c);if(B&&B.c.cm){B.c.cm.forEach(m=>sc.remove(m));B.c.cm=null}SL=[];B=null;$("bill").hidden=true;drawScr("SIAP","",null)}
 const RC=new THREE.Raycaster(),NDC=new THREE.Vector2();
 function tapItem(e){
+ if(B&&B.ask&&!B.took){const o=B.c.hold;if(!o)return;const v=new THREE.Vector3();o.updateWorldMatrix(true,false);o.getWorldPosition(v);v.project(cam);const sx=(v.x+1)/2*innerWidth,sy=(1-v.y)/2*innerHeight;if(Math.hypot(e.clientX-sx,e.clientY-sy)<Math.max(110,innerHeight*.17))takePay();return}
  if(!B||!B.scan||!B.c.cm)return;NDC.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);RC.setFromCamera(NDC,cam);
  const live=B.c.cm.filter(m=>m.visible&&!m.userData.f),h=RC.intersectObjects(live,true)[0];if(!h)return;
  let o=h.object;while(o&&!live.includes(o))o=o.parent;if(!o)return;
@@ -684,16 +689,19 @@ function tapItem(e){
 function scanTick(dt,now){
  if(!B){if(CASH){const nx=cs.find(c=>c.st==="queue"&&c.rd&&c.cm);if(nx)beginBill(nx);else{sD("scant","block");sT("scant","⏳ Menunggu pelanggan di meja kasir…")}}return}
  if(B.mm&&B.mt<1){B.mt=Math.min(1,B.mt+dt*2.5);B.mm.position.set(3+.2*B.mt,1.25-.27*B.mt+Math.sin(Math.PI*B.mt)*.2,2.4+1.1*B.mt)}
+ if(B.ask&&!B.took){sD("scant","block");sT("scant",B.method==="qris"?"👆 Ketuk HP pelanggan untuk scan QRIS":"👆 Ketuk uang pelanggan untuk mengambilnya");if(B.c.hold){const q=B.c.qris?1.6:2.4,z=q*(1+.07*Math.sin(now*7));B.c.hold.scale.setScalar(z)}}
  if(!B.scan)return;const dur=S.mach>=2?.22:.38;
  B.fly=B.fly.filter(f=>{f.t+=dt;const p=Math.min(1,f.t/dur),o=f.m.userData.o;if(o)f.m.position.set(o.x+(2.3-o.x)*p,o.y+(1.3-o.y)*p+Math.sin(Math.PI*p)*.3,o.z+(3.62-o.z)*p);
-  if(p>=1){f.m.visible=false;const pid=B.units[f.k];B.run+=pr(pid);B.done++;drawScr(PP[pid].n,rp(pr(pid)),B.run);snd(1500,.07,"square",.05);return false}return true});
+  if(p>=1){f.m.visible=false;const pid=B.units[f.k];B.run+=pr(pid);B.done++;SL.push([PP[pid].n,rp(pr(pid))]);drawScr(PP[pid].n,rp(pr(pid)),B.run);snd(1500,.07,"square",.05);return false}return true});
  if(!B.fin){B.c.cm.forEach(m=>{if(m.visible&&!m.userData.f&&m.userData.ol){const s=1.12+.03*Math.sin(now*6);m.userData.ol.scale.set(s,s,s)}});sD("scant","block");sT("scant","👆 Ketuk barang untuk dipindai ("+B.done+"/"+B.units.length+")")}
  if(B.done>=B.units.length&&!B.fly.length&&!B.fin){B.fin=true;B.scan=false;sD("scant","none");finishScan()}}
 function finishScan(){
  drawScr("","",B.tot);
  holdPay(B.c);
  SFX.pop();$("bill").hidden=false;
- if(B.hag){$("hag").hidden=false;sT("hgt","💬 Pelanggan minta diskon "+rp(B.hag)+". Kasih?")}else showPay()}
+ if(B.hag){$("hag").hidden=false;sT("hgt","💬 Pelanggan minta diskon "+rp(B.hag)+". Kasih?")}else askTake()}
+function askTake(){B.ask=true;B.took=false;$("hag").hidden=true;$("pay").hidden=true}
+function takePay(){if(!B||!B.ask||B.took)return;B.took=true;sD("scant","none");const c=B.c;if(B.method==="qris")SFX.scan();else{SFX.cash();flyHold(c)}vib(10);showPay()}
 function showPay(){
  $("hag").hidden=true;$("pay").hidden=false;const q=B.method==="qris";
  document.querySelectorAll(".cashonly").forEach(e=>e.style.display=q?"none":"");
@@ -702,8 +710,8 @@ function showPay(){
  if(q&&S.mach>=3){const b=B;setTimeout(()=>{if(B===b)$("ok").click()},700)}}
 function hintUI(){const q=B&&B.method==="qris",v=S.mach>=5&&!q;sD("hintrow",v?"flex":"none");if(v)sT("hintv",S.set.hint!==0?rp(B.paid-B.tot):"(mati)")}
 $("hintrow").addEventListener("click",()=>{if(!B)return;S.set.hint=S.set.hint===0?1:0;save();hintUI()});
-$("hy").addEventListener("click",()=>{if(!B||!B.hag)return;B.tot-=B.hag;B.hag=0;B.dsc=1;rate(4);msg("Diskon diberikan. Pelanggan senang!");showPay()});
-$("hn").addEventListener("click",()=>{if(!B||!B.hag)return;B.hag=0;B.dsc=-1;rate(2);msg("Diskon ditolak. Pelanggan agak kesal.");showPay()});
+$("hy").addEventListener("click",()=>{if(!B||!B.hag)return;B.tot-=B.hag;B.hag=0;B.dsc=1;rate(4);msg("Diskon diberikan. Pelanggan senang!");drawScr("","",B.tot);askTake()});
+$("hn").addEventListener("click",()=>{if(!B||!B.hag)return;B.hag=0;B.dsc=-1;rate(2);msg("Diskon ditolak. Pelanggan agak kesal.");askTake()});
 /* tombol uang rupiah: ketuk pecahan untuk menambah kembalian */
 const BILLS=[[2000,"#c9ccd1"],[5000,"#d8b48a"],[10000,"#b9a3e3"],[20000,"#9ad8a6"],[50000,"#8cc4ee"],[100000,"#f09aa6"]];
 const COINS=[[500,"#dfe3e8"],[1000,"#f2c14e"]];
