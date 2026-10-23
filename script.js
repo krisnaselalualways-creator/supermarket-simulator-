@@ -360,6 +360,8 @@ function animPerson(m,mv,now,seed){
  const rr=u.rr=(u.rr||0)+((u.rc||0)-(u.rr||0))*Math.min(1,dt*9);
  if(rr>.01){a0.rotation.x=a0.rotation.x*(1-rr)-1.4*rr;a0.userData.e.rotation.x=a0.userData.e.rotation.x*(1-rr)-.3*rr;u.h.rotation.x+=.12*rr}
  const py=u.pyr=(u.pyr||0)+((u.py||0)-(u.pyr||0))*Math.min(1,dt*6);
+ const ps=u.psr=(u.psr||0)+((u.ps||0)-(u.psr||0))*Math.min(1,dt*6);
+ if(ps>.01){[a0,a1].forEach(a=>{a.rotation.x=a.rotation.x*(1-ps)-1.05*ps;a.userData.e.rotation.x=a.userData.e.rotation.x*(1-ps)-.2*ps})}
  if(py>.01){a1.rotation.x=a1.rotation.x*(1-py)-1.2*py;a1.userData.e.rotation.x=a1.userData.e.rotation.x*(1-py)-.5*py;u.h.rotation.x+=.05*py}
  m.rotation.x=.07*k+.1*rr;
  return (1-Math.abs(a))*.045*k}
@@ -660,9 +662,9 @@ function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.pus
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
-  c.m.userData.rc=0;if(c.tg)c.tg.visible=!(c.st==="queue"||c.st==="pay");if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
+  c.m.userData.rc=0;if(c.tg){c.tg.visible=!(c.st==="queue"||c.st==="pay");c.m.userData.ps=c.tg.visible?1:0}if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
   if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt)){c.st=c.ty==="bulk"&&!c.hasT?"trl":"shop";if(Math.random()<.5)say(c,pick(c.kid?["Waaah, banyak jajan!","Ma, ayo cepat!"]:["Selamat siang!","Cari apa ya…","Tokonya rapi, nih"]))}}
-  else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.5);c.hasT=1;c.st="shop"}}}}
+  else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.62);c.hasT=1;c.st="shop"}}}}
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(c.brInit===undefined){c.brInit=1;c.br=Math.random()<.45?pick(S.shelves.map((id,k)=>id&&slots[k]?k:-1).filter(k=>k>=0)):-1}
    if(w&&c.br>=0&&!c.brd){const sl=slots[c.br];if(!sl)c.brd=1;else{const p=stand(c.br,c.off);if(walk(c,p[0],p[1],dt)){c.bt=(c.bt||0)+dt;c.m.rotation.y=Math.atan2(sl.x-c.x,sl.z-c.z);c.m.userData.rc=c.bt>.6&&c.bt<1.3?1:0;if(c.bt>1.9)c.brd=1}}}
