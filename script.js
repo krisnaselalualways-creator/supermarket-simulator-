@@ -76,8 +76,8 @@ const SFX={
 addEventListener("pointerdown",()=>{ensureAC();amb()},{passive:true});
 
 /* ---------- event & harga grosir ---------- */
-const EVS=[{k:"ramai",n:"🔥 Jam ramai",t:40},{k:"hujan",n:"🌧️ Hujan deras",t:40},{k:"promo",n:"🏷️ Promo pemasok -30%",t:60}];
-const cost=p=>Math.round(p.p*.7*12*(ev&&ev.k==="promo"?.7:1)/100)*100;
+const EVS=[{k:"ramai",n:"🔥 Jam ramai",t:40},{k:"hujan",n:"🌧️ Hujan deras",t:40}];
+const cost=p=>Math.round(p.p*.7*12/100)*100;
 const mkl_old=id=>{const m=S.mk[id]||1,o=S.mkp[id]||1,ar=m>o+.001?"▲":m<o-.001?"▼":"•";return (m<.9?"🟢 murah":m>1.15?"🔴 mahal":"🟡 normal")+" "+ar};
 function rollMarket(){P.forEach(p=>{const o=S.mk[p.id]||1;S.mkp[p.id]=o;S.mk[p.id]=Math.round(cl(1+(o-1)*.6+(Math.random()-.5)*.5,.7,1.5)*20)/20})}
 
@@ -104,6 +104,12 @@ rs();
 /* ---------- material, geometri (di-cache), tekstur ---------- */
 const MC={},mat=c=>MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c}));
 const GCH={},bgeo=(w,h,d)=>{const k=w+"|"+h+"|"+d;return GCH[k]||(GCH[k]=new THREE.BoxGeometry(w,h,d))};
+const STR=[];
+function mkTrolley(p,x,z){const g=new THREE.Group();g.position.set(x,0,z);p.add(g);
+ box(.4,.04,.56,"#9aa3b0",0,.24,.1,g);box(.46,.22,.62,"#c0504d",0,.47,.1,g);box(.5,.03,.66,"#8a8f99",0,.595,.1,g);
+ [-.17,.17].forEach(a=>[-.14,.34].forEach(b=>{box(.04,.16,.04,"#9aa3b0",a,.14,b,g);box(.06,.07,.06,"#333",a,.035,b,g)}));
+ [-.2,.2].forEach(a=>box(.04,.4,.04,"#9aa3b0",a,.8,-.2,g));box(.44,.04,.04,"#9aa3b0",0,1.0,-.2,g);return g}
+function retTrl(c){if(c.slot){c.slot.g.visible=true;c.slot.free=true;c.slot=null}}
 function box(w,h,d,c,x,y,z,p){const m=new THREE.Mesh(bgeo(w,h,d),mat(c));m.position.set(x,y,z);p.add(m);return m}
 function fit(g,t,z,maxW,bold){g.font=(bold?"bold ":"")+z+"px sans-serif";while(g.measureText(t).width>maxW&&z>10){z-=2;g.font=(bold?"bold ":"")+z+"px sans-serif"}}
 function canvasTex(w,h,draw){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.userData={c};return t}
@@ -430,8 +436,7 @@ function buildStore(){
  [-2,1].forEach(z=>{const m=new THREE.Mesh(bgeo(.06,1.2,1.8),winM);m.position.set(.12,1.7,z);add(m);const rw=new THREE.Mesh(RAINPW,RAINM);rw.rotation.y=Math.PI/2;rw.position.set(.16,1.7,z);add(rw)});
  const ro=new THREE.Mesh(RAINPO,RAINM2);ro.rotation.y=Math.PI;ro.position.set(w-2.5,1.7,7.6);add(ro);
  [[.9,-5.1],[w-.9,-5.1]].forEach(([x,z])=>{box(.4,.4,.4,"#8a5a3a",x,.2,z,world);const lf=new THREE.Mesh(new THREE.SphereGeometry(.38,8,6),mat("#4a8a4a"));lf.position.set(x,.75,z);add(lf)});
- const trolley=(x,z)=>{box(.7,.08,1,"#9aa3b0",x,.2,z,world);box(.7,.32,1,"#c0504d",x,.45,z,world);box(.7,.05,.05,"#9aa3b0",x,.85,z-.55,world);box(.05,.4,.05,"#9aa3b0",x-.3,.65,z-.55,world);box(.05,.4,.05,"#9aa3b0",x+.3,.65,z-.55,world)};
- trolley(w-.6,2);trolley(w-.6,3.3);obst.push({x:w-.6,z:2.65,hx:.4,hz:1.3});
+ STR.length=0;[2,3.3].forEach(z=>{const g=new THREE.Group();g.position.set(w-.6,0,z);world.add(g);mkTrolley(g,0,0);STR.push({g,z,free:true})});obst.push({x:w-.6,z:2.65,hx:.4,hz:1.3});
  box(.4,.6,.4,"#4a4f5a",.8,.3,1.9,world);box(.44,.06,.44,"#2f3340",.8,.62,1.9,world);obst.push({x:.8,z:1.9,hx:.3,hz:.3});
  rvM=add(new THREE.Mesh(new THREE.PlaneGeometry(2,1.25),new THREE.MeshBasicMaterial({map:canvasTex(256,160,()=>{})})));rvM.position.set(2.2,1.9,-5.85);drawBoard();
  // pintu kaca geser
@@ -614,7 +619,7 @@ function spawn(){
  const n=kid?1:ty==="rush"?1:ty==="bulk"?2+Math.floor(Math.random()*2):1+Math.floor(Math.random()*2);
  const wants=av.sort(()=>Math.random()-.5).slice(0,n).map(p=>({pid:p.id,q:1+Math.floor(Math.random()*2)}));
  const wants2=kid?(()=>{const kp=av.filter(p=>KIDP.includes(p.id));return kp.length?[{pid:pick(kp).id,q:1}]:wants})():wants;
- const m=person(pick(SH),pick(HAIR),pick(SKIN),pick(PANTS),Math.random()<.25,ty==="bulk");if(kid)m.scale.setScalar(.72);if(ty==="bulk")addTrolley(m);sc.add(m);
+ const m=person(pick(SH),pick(HAIR),pick(SKIN),pick(PANTS),Math.random()<.25,ty==="bulk");if(kid)m.scale.setScalar(.72);sc.add(m);
  if(ty!=="normal"){const ic=emoSprite({rush:"⏱️",bulk:"🛒",tawar:"💬"}[ty]);ic.position.set(0,2.05,0);m.add(ic)}
  SFX.bell();cs.push({m,ty,pat:ty==="rush"?45:ty==="bulk"?150:120,qris:Math.random()<(S.mach>=3?.6:.35),mv:false,x:W()-2.5,z:8,kid,wants:wants2,cart:[],st:"in",i:0,t:0,wait:0,qt:0,sp:(ty==="rush"?2.5:kid?1.9:1.5)+Math.random()*.5,off:(Math.random()-.5)*1.4,rd:false})}
 function mvTo(c,tx,tz,dt){const dx=tx-c.x,dz=tz-c.z,d=Math.hypot(dx,dz);if(d<.08){c.mv=false;return true}c.mv=true;const s=Math.min(d,c.sp*dt);c.x+=dx/d*s;c.z+=dz/d*s;c.m.rotation.y=Math.atan2(dx,dz);return false}
@@ -655,8 +660,9 @@ function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.pus
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
-  c.m.userData.rc=0;if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
-  if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt)){c.st="shop";if(Math.random()<.5)say(c,pick(c.kid?["Waaah, banyak jajan!","Ma, ayo cepat!"]:["Selamat siang!","Cari apa ya…","Tokonya rapi, nih"]))}}
+  c.m.userData.rc=0;if(c.tg)c.tg.visible=!(c.st==="queue"||c.st==="pay");if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
+  if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt)){c.st=c.ty==="bulk"&&!c.hasT?"trl":"shop";if(Math.random()<.5)say(c,pick(c.kid?["Waaah, banyak jajan!","Ma, ayo cepat!"]:["Selamat siang!","Cari apa ya…","Tokonya rapi, nih"]))}}
+  else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.5);c.hasT=1;c.st="shop"}}}}
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(c.brInit===undefined){c.brInit=1;c.br=Math.random()<.45?pick(S.shelves.map((id,k)=>id&&slots[k]?k:-1).filter(k=>k>=0)):-1}
    if(w&&c.br>=0&&!c.brd){const sl=slots[c.br];if(!sl)c.brd=1;else{const p=stand(c.br,c.off);if(walk(c,p[0],p[1],dt)){c.bt=(c.bt||0)+dt;c.m.rotation.y=Math.atan2(sl.x-c.x,sl.z-c.z);c.m.userData.rc=c.bt>.6&&c.bt<1.3?1:0;if(c.bt>1.9)c.brd=1}}}
@@ -667,7 +673,7 @@ function updC(dt,now){
      else say(c,"Yah, habis…",true);c.i++;c.t=0}}}}}
   else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(walk(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat*.55&&!c.said2){c.said2=1;say(c,"Lama ya…")}if(c.wait>c.pat)out(c,1,"an")}
   else if(c.st==="pay"){mvTo(c,3,2.62,dt);if(!c.mv)c.m.rotation.y*=.8}
-  else if(c.st==="out"){if(c.bye){say(c,c.bye,true);c.bye=null}const p=c.path[0];if(p&&walk(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);c.dead=true}}
+  else if(c.st==="out"){if(c.bye){say(c,c.bye,true);c.bye=null}const p=c.path[0];if(p&&walk(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);retTrl(c);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
 
@@ -780,7 +786,7 @@ function ordTick(dt){
 function showSum(t,h){sT("st",t);$("sb").innerHTML=h;sT("sn","▶ Mulai hari ke-"+(S.day+1));$("sum").hidden=false}
 function endDay(){
  SUMV=true;ORD=[];cr.forEach(c=>sc.remove(c.m));cr=[];ordT=20;
- cs.forEach(c=>{if(c.cm)c.cm.forEach(m=>sc.remove(m));sc.remove(c.m)});cs=[];leaveCash();
+ cs.forEach(c=>{if(c.cm)c.cm.forEach(m=>sc.remove(m));sc.remove(c.m);retTrl(c)});cs=[];leaveCash();
  const D=S.D,n=S.shelves.filter(Boolean).length,rent=25000,pw=fixk(1200)*n,wg=S.worker?30000:0,fix=rent+pw+wg,net=D.rev-D.cogs-fix;
  const tg=Math.min(fixk(20000)+(S.day-1)*fixk(6000),fixk(150000)),old=S.debt||0,due=fix+old,pay=Math.min(S.money,due);
  S.money-=pay;S.debt=due-pay;let warn="";
