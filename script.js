@@ -302,6 +302,14 @@ const PGM={cyl:(a,b,h,n)=>{const k=a+"|"+b+"|"+h+"|"+n;return PGM[k]||(PGM[k]=ne
  sph:(r,w,h)=>{const k="s"+r+"|"+w+"|"+h;return PGM[k]||(PGM[k]=new THREE.SphereGeometry(r,w||10,h||8))}};
 const PHEAD=new THREE.SphereGeometry(1,14,10),PCAP=new THREE.SphereGeometry(1,14,8,0,Math.PI*2,0,Math.PI*.44),PSH=new THREE.SphereGeometry(1,10,6,0,Math.PI*2,0,Math.PI*.5);
 function pm(geo,c,x,y,z,p,sx,sy,sz){const m=new THREE.Mesh(geo,mat(c));m.position.set(x,y,z);if(sx)m.scale.set(sx,sy,sz);p.add(m);return m}
+function mkHand(E,skin,s){const H=new THREE.Group();H.position.y=-.27;E.add(H);E.userData.h=H;const fs=[];
+ pm(bgeo(.078,.088,.034),skin,0,-.046,0,H);
+ [[-.027,.044],[-.009,.05],[.009,.047],[.027,.037]].forEach(([x,l])=>{const F=new THREE.Group();F.position.set(x,-.09,0);H.add(F);pm(bgeo(.0165,l,.019),skin,0,-l/2,0,F);
+  const K=new THREE.Group();K.position.y=-l;F.add(K);pm(bgeo(.015,l*.8,.017),skin,0,-l*.4,0,K);fs.push({F,K})});
+ const T=new THREE.Group();T.position.set(-s*.042,-.03,.004);T.rotation.z=s*.55;T.rotation.x=-.2;H.add(T);pm(bgeo(.02,.04,.022),skin,0,-.02,0,T);
+ const T2=new THREE.Group();T2.position.y=-.04;T.add(T2);pm(bgeo(.018,.032,.02),skin,0,-.016,0,T2);
+ H.userData.f=fs;H.userData.t=[T,T2];setGrip(H,0)}
+function setGrip(H,g){H.userData.f.forEach((q,i)=>{q.F.rotation.x=-.28-.95*g-i*.03;q.K.rotation.x=-.35-.9*g});H.userData.t[0].rotation.x=-.2-.55*g;H.userData.t[1].rotation.x=-.2-.5*g}
 function person(col,hair,skin,pants,hat,nb,kind){
  skin=skin||"#f3cfa6";pants=pants||"#3b4468";const g=new THREE.Group(),shoe="#2b2623";
  const sh=new THREE.Mesh(CIRC,SHM);sh.rotation.x=-Math.PI/2;sh.position.y=.012;g.add(sh);
@@ -323,7 +331,7 @@ function person(col,hair,skin,pants,hat,nb,kind){
   pm(PGM.cyl(.062,.056,.27,8),col,0,-.14,0,A);
   const E=new THREE.Group();E.position.y=-.27;A.add(E);A.userData.e=E;
   pm(PGM.cyl(.05,.042,.25,8),skin,0,-.125,0,E);
-  pm(PGM.sph(.052,8,6),skin,0,-.27,0,E);return A});
+  mkHand(E,skin,s);return A});
  /* kepala: agak lonjong, ada telinga, hidung, mata, alis, mulut */
  const hd=new THREE.Group();hd.position.set(0,1.44,0);g.add(hd);g.userData.h=hd;g.userData.k=0;g.userData.ph=0;g.rotation.order="YXZ";
  pm(PHEAD,skin,0,0,0,hd,.135,.16,.145);
@@ -362,8 +370,9 @@ function animPerson(m,mv,now,seed){
  const py=u.pyr=(u.pyr||0)+((u.py||0)-(u.pyr||0))*Math.min(1,dt*6);
  const ps=u.psr=(u.psr||0)+((u.ps||0)-(u.psr||0))*Math.min(1,dt*6);
  if(ps>.01){[a0,a1].forEach(a=>{a.rotation.x=a.rotation.x*(1-ps)-1.05*ps;a.userData.e.rotation.x=a.userData.e.rotation.x*(1-ps)-.2*ps})}
+ {const gp=Math.max(py,ps);setGrip(a1.userData.e.userData.h,gp);setGrip(a0.userData.e.userData.h,ps)}
  if(py>.01){a1.rotation.x=a1.rotation.x*(1-py)-1.2*py;a1.userData.e.rotation.x=a1.userData.e.rotation.x*(1-py)-.5*py;u.h.rotation.x+=.05*py}
- m.rotation.x=.07*k+.1*rr;
+ m.rotation.x=.07*k+.1*rr+.09*ps;
  return (1-Math.abs(a))*.045*k}
 
 /* ---------- dunia toko ---------- */
@@ -598,7 +607,7 @@ function makePhone(){const g=new THREE.Group(),pv=new THREE.Group();pv.position.
  const qr=new THREE.Mesh(new THREE.PlaneGeometry(.06,.11),new THREE.MeshBasicMaterial({map:canvasTex(64,112,g2=>{g2.fillStyle="#fff";g2.fillRect(0,0,64,112);g2.fillStyle="#1f8a4c";g2.fillRect(0,0,64,10);g2.fillStyle="#111";
   for(let y=0;y<9;y++)for(let x=0;x<9;x++)if((x*7+y*13+x*y)%3===0)g2.fillRect(8+x*5.3,24+y*5.3,5,5);[[8,24],[43,24],[8,59]].forEach(([x,y])=>{g2.fillStyle="#111";g2.fillRect(x,y,13,13);g2.fillStyle="#fff";g2.fillRect(x+3,y+3,7,7);g2.fillStyle="#111";g2.fillRect(x+5,y+5,3,3)});g2.fillStyle="#1f8a4c";g2.font="bold 11px sans-serif";g2.textAlign="center";g2.fillText("QRIS",32,100)})}));
  qr.position.z=.0065;pv.add(qr);return g}
-function holdPay(c){dropPay(c);const E=c.m.userData.a[1].userData.e,o=c.qris?makePhone():makeFan(splitPaid(B.paid));o.position.set(0,-.32,0);o.scale.setScalar(c.qris?1.6:2.4);o.rotation.x=c.qris?-.9:-1.45;E.add(o);c.hold=o;c.m.userData.py=1;(c.m.userData.bag||[]).forEach(m=>m.visible=false);if(c.qris)SFX.scan()}
+function holdPay(c){dropPay(c);const E=c.m.userData.a[1].userData.e,o=c.qris?makePhone():makeFan(splitPaid(B.paid));o.position.set(0,-.33,c.qris?.03:-.08);o.scale.setScalar(c.qris?1.6:2.4);o.rotation.x=c.qris?-.9:-.85;E.add(o);c.hold=o;c.m.userData.py=1;(c.m.userData.bag||[]).forEach(m=>m.visible=false);if(c.qris)SFX.scan()}
 function dropPay(c){if(!c||!c.m)return;if(c.hold){if(c.hold.parent)c.hold.parent.remove(c.hold);c.hold=null}c.m.userData.py=0;(c.m.userData.bag||[]).forEach(m=>m.visible=true)}
 function flyHold(c){const o=c.hold;if(!o)return;if(c.qris){dropPay(c);return}
  const wp=new THREE.Vector3(),wq=new THREE.Quaternion();o.updateWorldMatrix(true,false);o.getWorldPosition(wp);o.getWorldQuaternion(wq);
@@ -664,7 +673,7 @@ function updC(dt,now){
  for(const c of cs){c.rd=false;
   c.m.userData.rc=0;if(c.tg){c.tg.visible=!(c.st==="queue"||c.st==="pay");c.m.userData.ps=c.tg.visible?1:0}if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
   if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt)){c.st=c.ty==="bulk"&&!c.hasT?"trl":"shop";if(Math.random()<.5)say(c,pick(c.kid?["Waaah, banyak jajan!","Ma, ayo cepat!"]:["Selamat siang!","Cari apa ya…","Tokonya rapi, nih"]))}}
-  else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.62);c.hasT=1;c.st="shop"}}}}
+  else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.62);c.sp*=.72;c.hasT=1;c.st="shop"}}}}
   else if(c.st==="shop"){const w=c.wants[c.i];
    if(c.brInit===undefined){c.brInit=1;c.br=Math.random()<.45?pick(S.shelves.map((id,k)=>id&&slots[k]?k:-1).filter(k=>k>=0)):-1}
    if(w&&c.br>=0&&!c.brd){const sl=slots[c.br];if(!sl)c.brd=1;else{const p=stand(c.br,c.off);if(walk(c,p[0],p[1],dt)){c.bt=(c.bt||0)+dt;c.m.rotation.y=Math.atan2(sl.x-c.x,sl.z-c.z);c.m.userData.rc=c.bt>.6&&c.bt<1.3?1:0;if(c.bt>1.9)c.brd=1}}}
