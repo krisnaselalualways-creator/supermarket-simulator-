@@ -337,9 +337,14 @@ function person(col,hair,skin,pants,hat,nb,kind){
  pm(PHEAD,skin,0,0,0,hd,.135,.16,.145);
  pm(PGM.sph(.028,6,5),skin,-.14,-.01,0,hd);pm(PGM.sph(.028,6,5),skin,.14,-.01,0,hd);
  pm(PGM.sph(.026,6,5),skin,0,-.025,.15,hd,1,1.2,1);
- [-1,1].forEach(s=>{pm(PGM.sph(.02,6,5),"#fafafa",s*.052,.015,.128,hd,1,1,.5);pm(PGM.sph(.011,6,5),"#1b1b1b",s*.052,.015,.14,hd);
-  pm(bgeo(.055,.014,.01),hair,s*.052,.058,.13,hd)});
- pm(bgeo(.06,.012,.01),"#a8554f",0,-.075,.138,hd);
+ const FC={eye:[],pu:[],br:[],sd:[],es:.88+Math.random()*.3,pz:.9+Math.random()*.35,bw:.85+Math.random()*.4,bt:(Math.random()-.5)*.22,mw:.8+Math.random()*.5,by:0};
+ pm(PGM.sph(.001,3,2),skin,0,0,0,hd);
+ [-1,1].forEach(s=>{const ey=new THREE.Group();ey.position.set(s*.052,.015,.128);hd.add(ey);pm(PGM.sph(.02,6,5),"#fafafa",0,0,0,ey,FC.es,FC.es,.5);
+  const pu=pm(PGM.sph(.011,6,5),"#1b1b1b",0,0,.012,ey,FC.pz,FC.pz,1);FC.eye.push(ey);FC.pu.push(pu);
+  const bg=new THREE.Group();bg.position.set(s*.052,.058,.13);hd.add(bg);pm(bgeo(.055,.014*FC.bw,.01),hair,0,0,0,bg);FC.br.push(bg)});
+ const mo=new THREE.Group();mo.position.set(0,-.075,.138);hd.add(mo);FC.mo=mo;FC.mc=pm(bgeo(.03*FC.mw,.012,.01),"#a8554f",0,0,0,mo);
+ [-1,1].forEach(s=>{const sd=new THREE.Group();sd.position.set(s*.015*FC.mw,0,0);mo.add(sd);pm(bgeo(.024*FC.mw,.011,.01),"#a8554f",s*.011,0,0,sd);FC.sd.push(sd)});
+ g.userData.F=FC;g.userData.mo=.2;
  /* rambut: tutup kepala + rambut belakang (kadang panjang) */
  pm(PCAP,hair,0,.015,-.012,hd,.15,.17,.158);
  const long=Math.random()<.4;pm(PGM.sph(1,10,8),hair,0,-.01,-.06,hd,.15,long?.2:.14,.1);
@@ -356,6 +361,12 @@ function person(col,hair,skin,pants,hat,nb,kind){
  if(!nb){const T=g.userData.a[1].userData.e,bg1=pm(bgeo(.22,.2,.12),"#c0504d",0,-.39,.02,T),bg2=pm(bgeo(.22,.03,.12),"#8a3a38",0,-.29,.02,T);g.userData.bag=[bg1,bg2];
   const hn=new THREE.Mesh(new THREE.TorusGeometry(.055,.008,5,10,Math.PI),mat("#8a3a38"));hn.position.set(0,-.28,.02);T.add(hn);g.userData.bag.push(hn)}
  return g}
+function faceAnim(u,now,seed,dt){const F=u.F;if(!F)return;u.mo=(u.mo||0)+((u.md===undefined?.2:u.md)-(u.mo||0))*Math.min(1,dt*4);const md=u.mo;
+ const bl=((now+seed*3.7)%4.6)<.11?.12:1;F.eye.forEach(e=>e.scale.y=bl);
+ const gx=Math.sin(now*.7+seed)*.004,gy=Math.sin(now*.5+seed*2)*.002;F.pu.forEach(p=>{p.position.x=gx;p.position.y=gy});
+ F.br.forEach((b,i)=>{const s=i?1:-1;b.rotation.z=s*(-md*.42)+s*F.bt*(-1);b.position.y=.058+.007*Math.max(0,md)-.004*Math.max(0,-md)});
+ F.sd.forEach((d,i)=>{const s=i?1:-1;d.rotation.z=s*md*.75;d.position.y=md*.004});
+ const tk=u.talk?Math.abs(Math.sin(now*14+seed))*.8:0;F.mc.scale.y=1+tk*2.4;F.mo.position.y=-.075-tk*.004}
 function animPerson(m,mv,now,seed){
  const u=m.userData,dt=Math.min(.1,Math.max(0,now-(u.t===undefined?now:u.t)));u.t=now;
  u.k+=((mv?1:0)-u.k)*Math.min(1,dt*7);u.ph+=dt*8.5*u.k;const k=u.k,ph=u.ph+seed*3,a=Math.sin(ph)*k,c=Math.cos(ph);
@@ -373,6 +384,7 @@ function animPerson(m,mv,now,seed){
  {const gp=Math.max(py,ps);setGrip(a1.userData.e.userData.h,gp);setGrip(a0.userData.e.userData.h,ps)}
  if(py>.01){a1.rotation.x=a1.rotation.x*(1-py)-1.2*py;a1.userData.e.rotation.x=a1.userData.e.rotation.x*(1-py)-.5*py;u.h.rotation.x+=.05*py}
  m.rotation.x=.07*k+.1*rr+.09*ps;
+ faceAnim(u,now,seed,dt);
  return (1-Math.abs(a))*.045*k}
 
 /* ---------- dunia toko ---------- */
@@ -671,7 +683,8 @@ function placeItems(c){const u=[];c.cart.forEach(i=>{for(let j=0;j<i.q;j++)u.pus
 function updC(dt,now){
  const q=cs.filter(c=>c.st==="queue"||c.st==="pay").sort((a,b)=>a.qt-b.qt);
  for(const c of cs){c.rd=false;
-  c.m.userData.rc=0;if(c.tg){c.tg.visible=!(c.st==="queue"||c.st==="pay");c.m.userData.ps=c.tg.visible?1:0}if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
+  c.m.userData.rc=0;{const wr=c.pat?c.wait/c.pat:0,u2=c.m.userData;u2.md=c.fm!==undefined?c.fm:(c.st==="queue"||c.st==="pay")?Math.max(-1,.55-wr*1.7):(c.ty==="rush"?-.25:.3);u2.talk=c.bub?1:0}
+  if(c.tg){c.tg.visible=!(c.st==="queue"||c.st==="pay");c.m.userData.ps=c.tg.visible?1:0}if(c.bub&&performance.now()/1000>c.bub.until)unsay(c);
   if(c.st==="in"){if(walk(c,W()-2.5,4.8,dt)){c.st=c.ty==="bulk"&&!c.hasT?"trl":"shop";if(Math.random()<.5)say(c,pick(c.kid?["Waaah, banyak jajan!","Ma, ayo cepat!"]:["Selamat siang!","Cari apa ya…","Tokonya rapi, nih"]))}}
   else if(c.st==="trl"){const sl=c.slot||STR.filter(q=>q.free&&q.g.parent).sort((a,b)=>b.z-a.z)[0];if(!sl){c.hasT=1;c.st="shop"}else{if(!c.slot){c.slot=sl;sl.free=false}if(walk(c,W()-1.75,sl.z,dt)){c.m.rotation.y=Math.PI/2;c.m.userData.rc=1;c.gt=(c.gt||0)+dt;if(c.gt>.7){sl.g.visible=false;c.tg=mkTrolley(c.m,0,.62);c.sp*=.72;c.hasT=1;c.st="shop"}}}}
   else if(c.st==="shop"){const w=c.wants[c.i];
@@ -684,7 +697,7 @@ function updC(dt,now){
      else say(c,"Yah, habis…",true);c.i++;c.t=0}}}}}
   else if(c.st==="queue"){const i=q.indexOf(c);c.wait+=dt*(i>0?.5:1);if(walk(c,3+i*.9,2.2,dt)&&i===0){c.rd=true;if(!c.cm&&!B)placeItems(c)}if(c.wait>c.pat*.55&&!c.said2){c.said2=1;say(c,"Lama ya…")}if(c.wait>c.pat)out(c,1,"an")}
   else if(c.st==="pay"){mvTo(c,3,2.62,dt);if(!c.mv)c.m.rotation.y*=.8}
-  else if(c.st==="out"){if(c.bye){say(c,c.bye,true);c.bye=null}const p=c.path[0];if(p&&walk(c,p[0],p[1],dt))c.path.shift();if(!c.path.length){sc.remove(c.m);retTrl(c);c.dead=true}}
+  else if(c.st==="out"){if(c.bye){say(c,c.bye,true);c.bye=null}const p=c.path[0];if(p&&walk(c,p[0],p[1],dt)){c.path.shift();if(c.slot&&c.tg&&c.path.length===2){c.m.rotation.y=Math.PI/2;c.m.remove(c.tg);c.tg=null;c.m.userData.ps=0;retTrl(c)}}if(!c.path.length){sc.remove(c.m);retTrl(c);c.dead=true}}
   c.m.position.set(c.x,animPerson(c.m,c.mv,now,c.off),c.z)}
  cs=cs.filter(c=>!c.dead)}
 
@@ -767,7 +780,7 @@ $("ok").addEventListener("click",()=>{
   if(st>1&&c.wait>c.pat*.6){rk="sl";st=3}if(B.dsc===1)rk="d5";else if(B.dsc===-1){rk="d3";st=Math.min(st,3)}if(c.ty==="rush"&&st>=4&&c.wait<8)rk="ru";addRev(st,pick(REV[rk]))}
  if(S.mach>=4){rate(5);snd(260,.18,"sawtooth",.03)}
  S.served++;msg(t);vib(d===0?[12,40,12]:30);burst(2.3,1.3,3.6,d===0?"#ffd166":"#ff8a80",d===0?10:5);
- if(Math.random()<.3)drop(c.x,c.z);const bye=d>=0?pick(["Makasih ya!","Sampai jumpa!","Besok mampir lagi","Mantap, terima kasih"]):"Kok kurang sih…",go=()=>{if(cs.includes(c)){c.st="out";c.path=EXIT();c.bye=bye}};if(takeChange(c))setTimeout(go,900);else go();finishBill();save()});
+ if(Math.random()<.3)drop(c.x,c.z);c.fm=d===0?1:d>0?.6:-1;const bye=d>=0?pick(["Makasih ya!","Sampai jumpa!","Besok mampir lagi","Mantap, terima kasih"]):"Kok kurang sih…",go=()=>{if(cs.includes(c)){c.st="out";c.path=c.slot&&c.tg?[[W()-1.75,c.slot.z]].concat(EXIT()):EXIT();c.bye=bye}};if(takeChange(c))setTimeout(go,900);else go();finishBill();save()});
 
 /* ---------- pesanan online & pegawai pengemas ---------- */
 function packOrder(o,auto){
